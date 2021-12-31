@@ -38,12 +38,13 @@ public class GameMainManager : MonoBehaviour
     public ushort MissLimit = 50;
 
     // 課題文字の左上座標
-    const int displayInitX = -375;
-    const int displayInitY = 210;
+    // アンカーは (0, 1) つまり 親オブジェクト Assignment の左上からの相対距離で指定
+    const int displayInitX = 12;
+    const int displayInitY = -10;
 
     // 課題文字の Text Mesh Pro 表示をいくつずつズラすか
-    const int displayCharXdiff = 19;
-    const int displayCharYdiff = -39;
+    const int displayCharXdiff = 18;
+    const int displayCharYdiff = -41;
 
     // 課題文字の文字数、表示の行数など
     const int assignmentLength = 360;
@@ -105,7 +106,7 @@ public class GameMainManager : MonoBehaviour
     // トライアル制御
     void OnCorrectKeyDown()
     {
-        assignedCharTMPs[nowTrialData.typedKeys].SetActive(false);
+        assignedCharTMPs[nowTrialData.typedKeys].GetComponent<TextMeshProUGUI>().color = new UnityEngine.Color(0.25f, 0.15f, 0.15f, 0.1f);
         nowTrialData.typedKeys++;
     }
     void OnIncorrectKeyDown()
