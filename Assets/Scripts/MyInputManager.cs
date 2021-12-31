@@ -71,7 +71,6 @@ public class MyInputManager : MonoBehaviour
         dictToKeyID_FromRawKey.Add(RawKey.Escape, 102);
 #endif
 
-#if UNITY_EDITOR
         // テスト用、とりあえず KeyID と CharID と Char に適当な対応をつける
         string defaultKeyCharMap = " abcdefghijklmnopqrstuvwxyz1234567890-^\0@[;:],./\\ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()\0=~|`{+*}<>?_";
         ushort idx = 0;
@@ -93,7 +92,6 @@ public class MyInputManager : MonoBehaviour
             }
 
         }
-#endif
 }
     // Start is called before the first frame update
     void Start()
