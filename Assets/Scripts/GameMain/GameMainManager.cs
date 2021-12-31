@@ -42,8 +42,8 @@ public class GameMainManager : MonoBehaviour
     const int displayInitY = 210;
 
     // 課題文字の Text Mesh Pro 表示をいくつずつズラすか
-    const int displayCharXdiff = 21;
-    const int displayCharYdiff = -41;
+    const int displayCharXdiff = 19;
+    const int displayCharYdiff = -39;
 
     // 課題文字の文字数、表示の行数など
     const int assignmentLength = 360;
