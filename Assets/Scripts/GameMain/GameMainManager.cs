@@ -44,7 +44,7 @@ public class GameMainManager : MonoBehaviour
     public const ushort NumOfChars = NumOfKeyPatterns - 2;
 
     // ミス制限
-    public ushort MissLimit = 50;
+    public ushort MissLimit = 99;
 
     // 課題文字の左上座標
     // アンカーは (0, 1) つまり 親オブジェクト Assignment の左上からの相対距離で指定
@@ -142,7 +142,7 @@ public class GameMainManager : MonoBehaviour
         for (int i = 0; i < assignmentLength; i++)
         {
             System.Random rnd = new System.Random(Seeds[i]);
-            ushort rnd_charID = (ushort)(rnd.Next(0, NumOfChars - 1));
+            ushort rnd_charID = (ushort)(rnd.Next(0, NumOfChars));
             nowTrialData.trialAssignment_CharID[i] = rnd_charID;
             nowTrialData.trialAssignment_Char[i] = MyInputManager.ToChar_FromCharID(rnd_charID);
         }
