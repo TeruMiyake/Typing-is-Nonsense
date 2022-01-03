@@ -15,7 +15,7 @@ public class MyInputManager : MonoBehaviour
 {
     // シフト管理。シフトキーは 2 つあるので、bool でなく int
     // メソッド内変数（入力受け取り後の確定した shifted）と区別するため、フィールドとしての shifted には _ 付与
-    [System.Obsolete("初期化状態によってバグが発生する可能性あり。要修正")]
+    [System.Obsolete("初期化状態によってバグが発生する可能性あり。要検証")]
     private int _shifted = 0;
 
     // KeyID と CharID（Key にアサインされた文字）間の変換

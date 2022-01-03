@@ -4,9 +4,7 @@ using System.Security.Cryptography; // 乱数生成
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-using System.Linq; // 配列初期化用
 using TMPro; // スクリプトから TextMeshPro の変更
-
 
 public class GameMainManager : MonoBehaviour
 {
@@ -16,9 +14,16 @@ public class GameMainManager : MonoBehaviour
         Waiting,
         TrialOn,
         Completed,
-        Canceled
+        Canceled,
+        Failed
     }
     GameState gameState = GameState.Waiting;
+
+    // 部下となるシーン内のマネジャー達
+    TweeterManager tweeter;
+
+    // 簡易設定オブジェクト
+    public GameObject missLimitInput;
 
     // 課題文字表示用プレハブ
     public GameObject AssignedCharTMPPrefab;
@@ -31,8 +36,9 @@ public class GameMainManager : MonoBehaviour
     public GameObject[] LapMissTMP;
     public GameObject TotalCPSTMP;
 
+
     // トライアル毎のデータ保管
-    trialData nowTrialData;
+    TrialData nowTrialData;
 
     // ここから基本設定
 
@@ -44,7 +50,7 @@ public class GameMainManager : MonoBehaviour
     public const ushort NumOfChars = NumOfKeyPatterns - 2;
 
     // ミス制限
-    public ushort MissLimit = 99;
+    ushort missLimit = 99;
 
     // 課題文字の左上座標
     // アンカーは (0, 1) つまり 親オブジェクト Assignment の左上からの相対距離で指定
@@ -61,42 +67,18 @@ public class GameMainManager : MonoBehaviour
     const int numOfLaps = 10;
 
 
-    class trialData
-    {
-        // 正しく打ったキー数 = 次打つキーID。0 から始まり assignmentLength で打切
-        public int typedKeys = 0;
-        // 現在何ラップ目か 1-indexed
-        public int nowLap = 1;
-        // トータルタイム・ラップタイム・各正解打鍵タイム
-        // それぞれのタイム・ミスは全て「合計タイム」で入れるので、打鍵時間を出すには引き算が必要
-        // lap, key の配列の [0] は番兵
-        public long totalTime = 0;
-        public long[] lapTime = Enumerable.Repeat<long>(0, numOfLaps + 1).ToArray();
-        public long [] keyTime = Enumerable.Repeat<long>(0, assignmentLength + 1).ToArray();
-        // トータルミス・ラップミス・各キー辺りミス（要るか？）
-        // それぞれのタイム・ミスは全て「合計タイム」で入れるので、打鍵時間を出すには引き算が必要
-        // lap, key の配列の [0] は番兵
-        public int totalMiss = 0;
-        public int[] lapMiss = Enumerable.Repeat<int>(0, numOfLaps + 1).ToArray();
-        public int[] keyMiss = Enumerable.Repeat<int>(0, assignmentLength + 1).ToArray();
-
-        public ushort[] trialAssignment_CharID;
-        public char[] trialAssignment_Char;
-
-        public trialData()
-        {
-            Debug.Log("New trialData was instantiated.");
-
-            trialAssignment_CharID = new ushort[assignmentLength];
-            trialAssignment_Char = new char[assignmentLength];
-        }
-    }
 
     // ストップウォッチ
     System.Diagnostics.Stopwatch myStopwatch;
 
     void Awake()
     {
+        // 部下を見つける
+        tweeter = GameObject.Find("Tweeter").GetComponent<TweeterManager>();
+
+        // 表示制御
+        tweeter.SetVisible(false);
+
         myStopwatch = new System.Diagnostics.Stopwatch();
 
         // EventBus にキー押下イベント発生時のメソッド実行を依頼
@@ -121,18 +103,44 @@ public class GameMainManager : MonoBehaviour
         EventBus.Instance.UnsubscribeEscKeyDown(OnBackButtonClick);
     }
 
+    // 部下とのやり取り
+    public System.Tuple<string, TrialData> GetTrialData()
+    {
+        if (gameState == GameState.TrialOn || gameState == GameState.Waiting)
+            return new System.Tuple<string, TrialData>(gameState.ToString(), null);
+        else
+            return new System.Tuple<string, TrialData>(gameState.ToString(), nowTrialData);
+    }
+
     // 状態制御メソッド
     void StartTrial()
     {
-        // 画面表示の初期化
-        TotalTimeTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
+        // 簡易設定中は動かせない ※シフト絡みのバグがここに眠ってるかも
+        if (missLimitInput.GetComponent<TMP_InputField>().isFocused) return;
+
+        // 簡易設定の読み込み
+        string strmisslim = missLimitInput.GetComponent<TMP_InputField>().text;
+        Debug.Assert(strmisslim != null && int.Parse(strmisslim) >= 0 && int.Parse(strmisslim) <= 999);
+        missLimit = ushort.Parse(strmisslim);
+
+        // 簡易設定を停止
+        missLimitInput.GetComponent<TMP_InputField>().readOnly = true;
+
+         // 画面表示の初期化
+         TotalTimeTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
         TotalMissTMP.GetComponent<TextMeshProUGUI>().text = $"0";
         TotalCPSTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
         if (gameState != GameState.Waiting)
             foreach (GameObject obj in assignedCharTMPs) Destroy(obj);
+        tweeter.SetVisible(false);
+
+
+        // ボタンの表示変更
+        GameObject.Find("StartButton").GetComponent<UnityEngine.UI.Button>().interactable = false;
+        GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Cancel Trial [Esc]";
 
         // nowTrialData の初期化
-        nowTrialData = new trialData();
+        nowTrialData = new TrialData(missLimit, assignmentLength, numOfLaps);
 
         // 乱数を生成して nowTrialData にセット
         RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
@@ -206,7 +214,17 @@ public class GameMainManager : MonoBehaviour
 
         // 完了してからトライアル情報の描画（トライアル中と計測の仕方が違うため）
         UpdateTrialInfo();
+
+        // ボタンの表示変更
+        GameObject.Find("StartButton").GetComponent<UnityEngine.UI.Button>().interactable = true;
+        GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Back To Title [Esc]";
+
+        // 簡易設定を再起動
+        missLimitInput.GetComponent<TMP_InputField>().readOnly = false;
     }
+    /// <summary>
+    /// ミス制限を超えると -> Failed, Esc -> Canceled
+    /// </summary>
     void CancelTrial()
     {
         // ストップウォッチを止めるが、ここの時間はもはや関係無い（キー打鍵時に計測しているため）
@@ -220,38 +238,21 @@ public class GameMainManager : MonoBehaviour
         // nowTrialData にトータルタイム
 
         Debug.Assert(gameState == GameState.TrialOn);
-        gameState = GameState.Canceled;
+        if (nowTrialData.totalMiss <= missLimit) gameState = GameState.Canceled;
+        else gameState = GameState.Failed;
 
         // キャンセルしてからトライアル情報の描画（トライアル中と計測の仕方が違うため）
         UpdateTrialInfo();
+
+        // ボタンの表示変更
+        GameObject.Find("StartButton").GetComponent<UnityEngine.UI.Button>().interactable = true;
+        GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Back To Title [Esc]";
+
+        // 簡易設定を再起動
+        missLimitInput.GetComponent<TMP_InputField>().readOnly = false;
     }
 
-    // トライアル制御
-    void OnCorrectKeyDown()
-    {
-        assignedCharTMPs[nowTrialData.typedKeys].GetComponent<TextMeshProUGUI>().color = new UnityEngine.Color(0.25f, 0.15f, 0.15f, 0.1f);
-        // nowTrialData にトータルタイムの入力
-        nowTrialData.typedKeys++;
-        // ラップ完了
-        if (nowTrialData.typedKeys % lapLength == 0) CompleteLap();
-        // トライアル完了
-        if (nowTrialData.typedKeys == assignmentLength) CompleteTrial();
-    }
-    void OnIncorrectKeyDown()
-    {
-        // nowTrialData にトータルミスの入力
-        nowTrialData.totalMiss++;
-        // nowTrialData にラップミスの入力
-        int lap = nowTrialData.nowLap;
-        nowTrialData.lapMiss[lap] = nowTrialData.totalMiss;
-
-        if (nowTrialData.totalMiss >= MissLimit)
-        {
-            Debug.Log($"ミスが多すぎます。最初からやり直してください。");
-            CancelTrial();
-        }
-
-    }
+    // 表示制御
 
     // トライアル Information 描画メソッド
     // ここでは nowTrialData に記録済みのデータを描画するだけなので、更新は各イベント時に済ませる必要あり
@@ -279,21 +280,48 @@ public class GameMainManager : MonoBehaviour
         // 更に、LapTimeTMP [] は 0-indexed であることにも注意 -> [(i|lap)-1] でアクセス
         for (int i = 1; i <= lap; i++)
         {
-            LapTimeTMP[i-1].GetComponent<TextMeshProUGUI>().text = $"{(double)(nowTrialData.lapTime[i] - nowTrialData.lapTime[i-1]) / 1000:F3}";
+            LapTimeTMP[i - 1].GetComponent<TextMeshProUGUI>().text = $"{(double)(nowTrialData.lapTime[i] - nowTrialData.lapTime[i - 1]) / 1000:F3}";
         }
         // ゲーム中であった場合、現在ラップはリアルな経過時間を使って計算
-        if (gameState == GameState.TrialOn) LapTimeTMP[lap-1].GetComponent<TextMeshProUGUI>().text = $"{(double)(time - nowTrialData.lapTime[lap-1]) / 1000:F3}";
+        if (gameState == GameState.TrialOn) LapTimeTMP[lap - 1].GetComponent<TextMeshProUGUI>().text = $"{(double)(time - nowTrialData.lapTime[lap - 1]) / 1000:F3}";
         // ラップミスの表示
         for (int i = 1; i <= lap; i++)
         {
             int iLapMiss = nowTrialData.lapMiss[i] - nowTrialData.lapMiss[i - 1];
-            LapMissTMP[i-1].GetComponent<TextMeshProUGUI>().text = (iLapMiss == 0 ? "" : iLapMiss.ToString());
+            LapMissTMP[i - 1].GetComponent<TextMeshProUGUI>().text = (iLapMiss == 0 ? "" : iLapMiss.ToString());
         }
         // 終了していないラップは 空白 で埋める
-        for (int i = lap+1; i <= numOfLaps; i++)
+        for (int i = lap + 1; i <= numOfLaps; i++)
         {
             LapTimeTMP[i - 1].GetComponent<TextMeshProUGUI>().text = "";
             LapMissTMP[i - 1].GetComponent<TextMeshProUGUI>().text = "";
+        }
+
+    }
+
+    // トライアル制御
+    void OnCorrectKeyDown()
+    {
+        assignedCharTMPs[nowTrialData.typedKeys].GetComponent<TextMeshProUGUI>().color = new UnityEngine.Color(0.25f, 0.15f, 0.15f, 0.1f);
+        // nowTrialData にトータルタイムの入力
+        nowTrialData.typedKeys++;
+        // ラップ完了
+        if (nowTrialData.typedKeys % lapLength == 0) CompleteLap();
+        // トライアル完了
+        if (nowTrialData.typedKeys == assignmentLength) CompleteTrial();
+    }
+    void OnIncorrectKeyDown()
+    {
+        // nowTrialData にトータルミスの入力
+        nowTrialData.totalMiss++;
+        // nowTrialData にラップミスの入力
+        int lap = nowTrialData.nowLap;
+        nowTrialData.lapMiss[lap] = nowTrialData.totalMiss;
+
+        if (nowTrialData.totalMiss > missLimit)
+        {
+            Debug.Log($"ミスが多すぎます。最初からやり直してください。");
+            CancelTrial();
         }
 
     }
@@ -302,23 +330,34 @@ public class GameMainManager : MonoBehaviour
     // EventBus に渡して実行してもらう
     // OnBackButtonClick() では時間を測らない
     // キャンセル（Esc）時の totalTime は キャンセル時基準ではなく、最後の正解打鍵orミス打鍵時をとるため。
-    void OnBackButtonClick()
+    public void OnBackButtonClick()
     {
         if (gameState == GameState.TrialOn) CancelTrial();
         //else if (isCompleted) ;
         else MySceneManager.ChangeSceneRequest("TitleScene");
     }
-    void OnGameStartButtonClick()
+    public void OnGameStartButtonClick()
     {
         if (gameState == GameState.TrialOn) return;
         else StartTrial();
     }
+    public void OnTweeterButtonClick()
+    {
+        // トライアル中にわざわざマウス触るぐらいだから、 Space じゃなくて直でボタンをクリックした場合は、トライアル中でも表示させてもいいかも
+        // if (gameState == GameState.Completed ||  gameState == GameState.Canceled ||  gameState == GameState.Failed)
+        tweeter.ToggleVisible();
+    }
     // OnNormalKeyDown() で時間を計測
     // トライアル中の情報表示は Update() 内でタイマーを止めて雑に測ればいいが、ラップ・トライアル完了時の時間計測（キー押下にかかった時間）は正確にとる必要があるため。
+    [System.Obsolete("バインド機能つけたら、文字の判別方法を変更要")]
     void OnNormalKeyDown(ushort charID)
     {
-        if (gameState != GameState.TrialOn) return;
-        if (nowTrialData.trialAssignment_CharID[nowTrialData.typedKeys] == charID)
+        if (gameState != GameState.TrialOn) {
+            if (MyInputManager.ToChar_FromCharID(charID) == ' ')
+                OnTweeterButtonClick();
+            else return;
+        }
+        else if (nowTrialData.trialAssignment_CharID[nowTrialData.typedKeys] == charID)
         {
             nowTrialData.totalTime = myStopwatch.ElapsedMilliseconds;
             Debug.Log($"Correct Key {charID}:{MyInputManager.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
