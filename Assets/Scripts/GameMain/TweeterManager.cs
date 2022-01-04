@@ -92,20 +92,20 @@ public class TweeterManager : MonoBehaviour
             if (gstate == "Completed")
             {
                 tweeterInputField.GetComponent<TMP_InputField>().text = $"Completed a trial ({keys} chars) on #TypingIsNonsense !" +
-                    $"\nTIME {time / 1000:f3}s ({cps:f3}cps miss{miss}" +
+                    $"\nTIME {(double)time / 1000:f3}s ({cps:f3}cps miss{miss}" +
                     $"{(miss > 50 ? " > 50 = Unofficial)." : "). Wow!")}" +
                     $"\nRanking: https://terum.jp/tin/";
             }
             else if (gstate == "Canceled")
             {
                 tweeterInputField.GetComponent<TMP_InputField>().text = $"GAVE UP a trial ({keys}/360 chars) on #TypingIsNonsense ..." +
-                    $"\nTIME {time / 1000:f3}s ({cps:f3}cps miss{miss})." +
+                    $"\nTIME {(double)time / 1000:f3}s ({cps:f3}cps miss{miss})." +
                     $"\nRanking: https://terum.jp/tin/";
             }
             else if (gstate == "Failed")
             {
                 tweeterInputField.GetComponent<TMP_InputField>().text = $"FAILED a miss <= {nowTrialData.missLimit} challenge ({keys}/360 chars) on #TypingIsNonsense . OMG!" +
-                    $"\nTIME {time / 1000:f3}s ({cps:f3}cps miss{miss})." +
+                    $"\nTIME {(double)time / 1000:f3}s ({cps:f3}cps miss{miss})." +
                     $"\nRanking: https://terum.jp/tin/";
             }
         }
