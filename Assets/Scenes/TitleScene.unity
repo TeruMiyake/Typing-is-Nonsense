@@ -630,6 +630,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7666bc705b208bc428bbe21144cfd055, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  keyBind:
+    RawKeyMap: 1000100020004100420043004400450046004700480049004a004b004c004d004e004f0050005100520053005400550056005700580059005a003100320033003400350036003700380039003000bd00de00dc00c000db00bb00ba00dd00bc00be00bf00e200
+    NullKeyMap: 27005400
+    CharMap: 20006100620063006400650066006700680069006a006b006c006d006e006f0070007100720073007400750076007700780079007a0031003200330034003500360037003800390030002d005e00000040005b003b003a005d002c002e002f005c004100420043004400450046004700480049004a004b004c004d004e004f0050005100520053005400550056005700580059005a0021002200230024002500260027002800290000003d007e007c0060007b002b002a007d003c003e003f005f00
 --- !u!4 &1467670170
 Transform:
   m_ObjectHideFlags: 0
@@ -677,17 +681,17 @@ MonoBehaviour:
   m_MoveRepeatDelay: 0.5
   m_MoveRepeatRate: 0.1
   m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: 9098913b58df82343a2d65cc82bcb117, type: 3}
-  m_PointAction: {fileID: 1254396528043856168, guid: 9098913b58df82343a2d65cc82bcb117, type: 3}
-  m_MoveAction: {fileID: 0}
-  m_SubmitAction: {fileID: 0}
-  m_CancelAction: {fileID: 0}
-  m_LeftClickAction: {fileID: -1673256840961026956, guid: 9098913b58df82343a2d65cc82bcb117, type: 3}
-  m_MiddleClickAction: {fileID: 0}
-  m_RightClickAction: {fileID: 0}
-  m_ScrollWheelAction: {fileID: 0}
-  m_TrackedDevicePositionAction: {fileID: 0}
-  m_TrackedDeviceOrientationAction: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_MoveAction: {fileID: -8784545083839296357, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
 --- !u!114 &1482097358
@@ -1222,9 +1226,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Edit Key Bindings [E]
-
-    (Not yet implemented)'
+  m_text: Edit Key Bindings [E]
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

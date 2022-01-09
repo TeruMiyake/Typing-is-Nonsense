@@ -133,13 +133,12 @@ public class TweeterManager : MonoBehaviour
     public void OnJumpToWebsiteButtonClick() {
         JumpToWebsite();
     }
-    [System.Obsolete("バインド機能つけたら、文字の判別方法を変更要")]
+    [System.Obsolete("ショートカットバインド機能つけたら、文字の判別方法を変更要")]
     public void OnNormalKeyDown(ushort charID)
     {
-        char c = MyInputManager.ToChar_FromCharID(charID);
-        if (c == 'g' || c == 'G') OnGenerateTweetButtonClick();
-        if (c == 'c' || c == 'C') OnCopyToClickboardButtonClick();
-        if (c == 'j' || c == 'J') OnJumpToWebsiteButtonClick();
+        if (charID == 7) OnGenerateTweetButtonClick();
+        if (charID == 4) OnCopyToClickboardButtonClick();
+        if (charID == 10) OnJumpToWebsiteButtonClick();
     }
 
 }

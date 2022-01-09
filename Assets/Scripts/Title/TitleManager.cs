@@ -3,9 +3,15 @@ using UnityEngine.EventSystems;
 
 public class TitleManager : MonoBehaviour
 {
+    // ScriptableObject
+    [SerializeField]
+    KeyBind keyBind = null;
+    KeyBindDicts dicts;
 
     private void Awake()
     {
+        dicts = new KeyBindDicts(keyBind);
+
         // EventBus にキー押下イベント発生時のメソッド実行を依頼 *Unsubscribe 忘れず！
         EventBus.Instance.SubscribeNormalKeyDown(OnNormalKeyDown);
     }
@@ -56,9 +62,8 @@ public class TitleManager : MonoBehaviour
     public void OnNormalKeyDown(ushort charID)
     {
         Debug.Log("normalkeydown");
-        char c = MyInputManager.ToChar_FromCharID(charID);
-        if (c == 'n' || c == 'N') OnGameMainStartButtonClick();
-        if (c == 'e' || c == 'E') OnKeybindingStartButtonClick();
-        if (c == 'j' || c == 'J') OnJumpToWebsiteButtonClick();
+        if (charID == 14) OnGameMainStartButtonClick(); // T
+        if (charID == 5) OnKeybindingStartButtonClick(); // E
+        if (charID == 10) OnJumpToWebsiteButtonClick(); // J
     }
 }

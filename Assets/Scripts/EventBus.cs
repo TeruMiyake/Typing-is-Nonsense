@@ -36,6 +36,7 @@ public class EventBus
     public delegate void OnNormalKeyDown(ushort keyID);
     public delegate void OnReturnKeyDown();
     public delegate void OnEscKeyDown();
+    public delegate void OnKeyBindChanged();
     private event OnNormalKeyDown _onNormalKeyDown;
     private event OnReturnKeyDown _onReturnKeyDown;
     private event OnEscKeyDown _onEscKeyDown;
@@ -43,8 +44,16 @@ public class EventBus
     public delegate void OnRawKeyDown(RawKey key);
     private event OnRawKeyDown _onRawKeyDown;
 #endif
+    private event OnKeyBindChanged _onKeyBindChanged;
 
     // 他のクラスが通知受け取り（＝EventBusへのデリゲート登録）をするためのメソッド
+#if UNITY_STANDALONE_WIN
+    public void SubscribeRawKeyDown(OnRawKeyDown onRawKeyDown)
+    {
+        Debug.Log("subscribed.");
+        _onRawKeyDown += onRawKeyDown;
+    }
+#endif
     public void SubscribeNormalKeyDown(OnNormalKeyDown onNormalKeyDown)
     {
         _onNormalKeyDown += onNormalKeyDown;
@@ -57,14 +66,18 @@ public class EventBus
     {
         _onEscKeyDown += onEscKeyDown;
     }
-#if UNITY_STANDALONE_WIN
-    public void SubscribeRawKeyDown(OnRawKeyDown onRawKeyDown)
+    public void SubscribeKeyBindChanged(OnKeyBindChanged onKeyBindChanged)
     {
-        _onRawKeyDown += onRawKeyDown;
+        _onKeyBindChanged += onKeyBindChanged;
     }
-#endif
 
     // 他のクラスが通知受け取り解除をするためのメソッド
+#if UNITY_STANDALONE_WIN
+    public void UnsubscribeRawKeyDown(OnRawKeyDown onRawKeyDown)
+    {
+        _onRawKeyDown -= onRawKeyDown;
+    }
+#endif
     public void UnsubscribeNormalKeyDown(OnNormalKeyDown onNormalKeyDown)
     {
         _onNormalKeyDown -= onNormalKeyDown;
@@ -77,15 +90,19 @@ public class EventBus
     {
         _onEscKeyDown -= onEscKeyDown;
     }
-#if UNITY_STANDALONE_WIN
-    public void UnsubscribeRawKeyDown(OnRawKeyDown onRawKeyDown)
+    public void UnsubscribeKeyBindChanged(OnKeyBindChanged onKeyBindChanged)
     {
-        _onRawKeyDown -= onRawKeyDown;
+        _onKeyBindChanged -= onKeyBindChanged;
     }
-#endif
 
     // 他のクラスから、EventBus に通知を依頼するメソッド
     // char c を渡すのは冗長（MyInputManager.CharMap があるから）だが、便利そうなので残しておく
+#if UNITY_STANDALONE_WIN
+    public void NotifyRawKeyDown(RawKey key)
+    {
+        if (_onRawKeyDown != null) _onRawKeyDown(key);
+    }
+#endif
     public void NotifyNormalKeyDown(ushort keyID)
     {
         if (_onNormalKeyDown != null) _onNormalKeyDown(keyID);
@@ -98,11 +115,8 @@ public class EventBus
     {
         if (_onEscKeyDown != null) _onEscKeyDown();
     }
-
-#if UNITY_STANDALONE_WIN
-    public void NotifyRawKeyDown(RawKey key)
+    public void NotifyKeyBindChanged()
     {
-        if (_onRawKeyDown != null) _onRawKeyDown(key);
+        if (_onKeyBindChanged != null) _onKeyBindChanged();
     }
-#endif
 }

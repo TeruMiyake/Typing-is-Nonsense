@@ -19,6 +19,11 @@ public class GameMainManager : MonoBehaviour
     }
     GameState gameState = GameState.Waiting;
 
+    // ScriptableObject
+    [SerializeField]
+    KeyBind keyBind;
+    KeyBindDicts dicts;
+
     // 部下となるシーン内のマネジャー達
     TweeterManager tweeter;
 
@@ -44,13 +49,11 @@ public class GameMainManager : MonoBehaviour
 
     // アサインされた打鍵パターンの種類数 26*2 + 22*2 + Space
     public const ushort NumOfKeyPatterns = 97;
-    // アサインされたキーの数（スペースとシフト込み文字を引いたもの）
-    public const ushort NumOfUniqueChars = 48;
     // 文字種数（文字にバインドされない打鍵パターンが 2 つあるので - 2 ）
     public const ushort NumOfChars = NumOfKeyPatterns - 2;
 
-    // ミス制限
-    ushort missLimit = 99;
+    // Config（ミス制限など）
+    Config config = new Config();
 
     // 課題文字の左上座標
     // アンカーは (0, 1) つまり 親オブジェクト Assignment の左上からの相対距離で指定
@@ -73,11 +76,19 @@ public class GameMainManager : MonoBehaviour
 
     void Awake()
     {
+        keyBind = new KeyBind();
+        keyBind.LoadFromJson(0);
+        dicts = new KeyBindDicts(keyBind);
+
         // 部下を見つける
         tweeter = GameObject.Find("Tweeter").GetComponent<TweeterManager>();
 
         // 表示制御
         tweeter.SetVisible(false);
+
+        // Config の読み込みと表示への反映
+        config.Load();
+        GameObject.Find("MissLimiterInput").GetComponent<TMP_InputField>().text = config.MissLimit.ToString();
 
         myStopwatch = new System.Diagnostics.Stopwatch();
 
@@ -118,11 +129,6 @@ public class GameMainManager : MonoBehaviour
         // 簡易設定中は動かせない ※シフト絡みのバグがここに眠ってるかも
         if (missLimitInput.GetComponent<TMP_InputField>().isFocused) return;
 
-        // 簡易設定の読み込み
-        string strmisslim = missLimitInput.GetComponent<TMP_InputField>().text;
-        Debug.Assert(strmisslim != null && int.Parse(strmisslim) >= 0 && int.Parse(strmisslim) <= 999);
-        missLimit = ushort.Parse(strmisslim);
-
         // 簡易設定を停止
         missLimitInput.GetComponent<TMP_InputField>().readOnly = true;
 
@@ -139,8 +145,11 @@ public class GameMainManager : MonoBehaviour
         GameObject.Find("StartButton").GetComponent<UnityEngine.UI.Button>().interactable = false;
         GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Cancel Trial [Esc]";
 
+        // 設定の再読み込み（簡易設定で更新している場合があるので、ここで再度読み込む）
+        config.Load();
+
         // nowTrialData の初期化
-        nowTrialData = new TrialData(missLimit, assignmentLength, numOfLaps);
+        nowTrialData = new TrialData(config.MissLimit, assignmentLength, numOfLaps);
 
         // 乱数を生成して nowTrialData にセット
         RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
@@ -150,9 +159,14 @@ public class GameMainManager : MonoBehaviour
         for (int i = 0; i < assignmentLength; i++)
         {
             System.Random rnd = new System.Random(Seeds[i]);
-            ushort rnd_charID = (ushort)(rnd.Next(0, NumOfChars));
+            ushort rnd_charID = (ushort)(rnd.Next(0, NumOfChars)); // 0 ~ 94
+
+            // Null 文字をまたぐ毎に CharID を ++ する必要がある
+            if (rnd_charID >= keyBind.NullKeyMap[0]) rnd_charID++;
+            if (rnd_charID >= keyBind.NullKeyMap[1]) rnd_charID++;
+
             nowTrialData.trialAssignment_CharID[i] = rnd_charID;
-            nowTrialData.trialAssignment_Char[i] = MyInputManager.ToChar_FromCharID(rnd_charID);
+            nowTrialData.trialAssignment_Char[i] = dicts.ToChar_FromCharID(rnd_charID);
         }
 
         Debug.Log(string.Join(" ", nowTrialData.trialAssignment_CharID));
@@ -162,7 +176,7 @@ public class GameMainManager : MonoBehaviour
         // 課題文字の描画
         assignedCharTMPs = new GameObject[assignmentLength];
 
-        // Assignment オブジェクトの個として描画するため
+        // Assignment オブジェクトの子として描画するため
         GameObject asg = GameObject.Find("Assignment");
         assignedCharTMPs = new GameObject[assignmentLength];
 
@@ -238,7 +252,7 @@ public class GameMainManager : MonoBehaviour
         // nowTrialData にトータルタイム
 
         Debug.Assert(gameState == GameState.TrialOn);
-        if (nowTrialData.totalMiss <= missLimit) gameState = GameState.Canceled;
+        if (nowTrialData.totalMiss <= nowTrialData.missLimit) gameState = GameState.Canceled;
         else gameState = GameState.Failed;
 
         // キャンセルしてからトライアル情報の描画（トライアル中と計測の仕方が違うため）
@@ -318,7 +332,7 @@ public class GameMainManager : MonoBehaviour
         int lap = nowTrialData.nowLap;
         nowTrialData.lapMiss[lap] = nowTrialData.totalMiss;
 
-        if (nowTrialData.totalMiss > missLimit)
+        if (nowTrialData.totalMiss > nowTrialData.missLimit)
         {
             Debug.Log($"ミスが多すぎます。最初からやり直してください。");
             CancelTrial();
@@ -353,20 +367,20 @@ public class GameMainManager : MonoBehaviour
     void OnNormalKeyDown(ushort charID)
     {
         if (gameState != GameState.TrialOn) {
-            if (MyInputManager.ToChar_FromCharID(charID) == ' ')
+            if (charID == 0) // default: Space
                 OnTweeterButtonClick();
             else return;
         }
         else if (nowTrialData.trialAssignment_CharID[nowTrialData.typedKeys] == charID)
         {
             nowTrialData.totalTime = myStopwatch.ElapsedMilliseconds;
-            Debug.Log($"Correct Key {charID}:{MyInputManager.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
+            Debug.Log($"Correct CharID {charID}:{dicts.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
             OnCorrectKeyDown();
         }
         else
         {
             nowTrialData.totalTime = myStopwatch.ElapsedMilliseconds;
-            Debug.Log($"Incorrect Key {charID}:{MyInputManager.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
+            Debug.Log($"Incorrect CharID {charID}:{dicts.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
             OnIncorrectKeyDown();
         }
     }

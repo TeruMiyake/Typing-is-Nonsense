@@ -15,84 +15,33 @@ public class MyInputManager : MonoBehaviour
 {
     // シフト管理。シフトキーは 2 つあるので、bool でなく int
     // メソッド内変数（入力受け取り後の確定した shifted）と区別するため、フィールドとしての shifted には _ 付与
-    [System.Obsolete("初期化状態によってバグが発生する可能性あり。要検証")]
     private int _shifted = 0;
 
-    // KeyID と CharID（Key にアサインされた文字）間の変換
-    private static Dictionary<ushort, ushort> dictToKeyID_FromCharID = new Dictionary<ushort, ushort>();
-    private static Dictionary<ushort, ushort> dictToCharID_FromKeyID = new Dictionary<ushort, ushort>();
-
-    // Char と CharID 間の変換
-    private static Dictionary<ushort, char> dictToChar_FromCharID = new Dictionary<ushort, char>();
-    private static Dictionary<char, ushort> dictToCharID_FromChar = new Dictionary<char, ushort>();
-
-#if UNITY_STANDALONE_WIN
-    private static Dictionary<RawKey, ushort> dictToKeyID_FromRawKey = new Dictionary<RawKey, ushort>();
-#endif
+    // ScriptableObject
+    [SerializeField]
+    KeyBind keyBind;
+    KeyBindDicts dicts;
 
 
     void Awake()
     {
+        keyBind = new KeyBind();
+        keyBind.LoadFromJson(0);
+        dicts = new KeyBindDicts(keyBind);
+
 #if UNITY_STANDALONE_WIN
         Debug.Log("standalone win");
         var workInBackground = false;
         RawKeyInput.Start(workInBackground);
 
+        RawKeyInput.OnKeyDown += RawKeyDownHandlerForWin;
         RawKeyInput.OnKeyDown += KeyDownHandlerForWin;
         RawKeyInput.OnKeyUp += KeyUpHandlerForWin;
-
-        // キーバインド機能をつけたら削除する予定の、デフォルト Rawkey:KeyID Dictionary 設定
-        dictToKeyID_FromRawKey.Add(RawKey.Space, 0);
-        for (int i = 0; i <= 25; i++) dictToKeyID_FromRawKey.Add(RawKey.A + (ushort)i, (ushort)(i + 1));
-        dictToKeyID_FromRawKey.Add((RawKey)0x31, 27);
-        dictToKeyID_FromRawKey.Add((RawKey)0x32, 28);
-        dictToKeyID_FromRawKey.Add((RawKey)0x33, 29);
-        dictToKeyID_FromRawKey.Add((RawKey)0x34, 30);
-        dictToKeyID_FromRawKey.Add((RawKey)0x35, 31);
-        dictToKeyID_FromRawKey.Add((RawKey)0x36, 32);
-        dictToKeyID_FromRawKey.Add((RawKey)0x37, 33);
-        dictToKeyID_FromRawKey.Add((RawKey)0x38, 34);
-        dictToKeyID_FromRawKey.Add((RawKey)0x39, 35);
-        dictToKeyID_FromRawKey.Add((RawKey)0x30, 36);
-        dictToKeyID_FromRawKey.Add(RawKey.OEMMinus, 37);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM7, 38);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM5, 39);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM3, 40);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM4, 41);
-        dictToKeyID_FromRawKey.Add(RawKey.OEMPlus, 42);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM1, 43);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM6, 44);
-        dictToKeyID_FromRawKey.Add(RawKey.OEMComma, 45);
-        dictToKeyID_FromRawKey.Add(RawKey.OEMPeriod, 46);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM2, 47);
-        dictToKeyID_FromRawKey.Add(RawKey.OEM102, 48);
-        dictToKeyID_FromRawKey.Add(RawKey.Shift, 100);
-        dictToKeyID_FromRawKey.Add(RawKey.Return, 101);
-        dictToKeyID_FromRawKey.Add(RawKey.Escape, 102);
 #endif
 
-        // テスト用、とりあえず KeyID と CharID と Char に適当な対応をつける
-        string defaultKeyCharMap = " abcdefghijklmnopqrstuvwxyz1234567890-^\0@[;:],./\\ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()\0=~|`{+*}<>?_";
-        ushort idx = 0;
-        ushort charidx = 0;
-        foreach (char c in defaultKeyCharMap)
-        {
-            if (c == '\0')
-            {
-                idx++;
-            }
-            else
-            {
-                dictToKeyID_FromCharID[charidx] = idx;
-                dictToCharID_FromKeyID[idx] = charidx;
-                dictToChar_FromCharID[charidx] = c;
-                dictToCharID_FromChar[c] = charidx;
-                idx++;
-                charidx++;
-            }
+        EventBus.Instance.SubscribeKeyBindChanged(KeyBindChangedHandler);
+    }
 
-        }
-}
     // Start is called before the first frame update
     void Start()
     {
@@ -108,80 +57,61 @@ public class MyInputManager : MonoBehaviour
     private void OnDisable()
     {
 #if UNITY_STANDALONE_WIN
+        RawKeyInput.OnKeyDown -= RawKeyDownHandlerForWin;
         RawKeyInput.OnKeyDown -= KeyDownHandlerForWin;
         RawKeyInput.OnKeyUp -= KeyUpHandlerForWin;
 
         RawKeyInput.Stop(); // 入れないと Unity Editor が落ちる
 #endif
+
+        EventBus.Instance.UnsubscribeKeyBindChanged(KeyBindChangedHandler);
     }
 
     // プラットフォーム依存のキー入力イベントハンドラ
     // プラットフォーム依存のキーコードを、ユーザ固有の KeyID に変換してプラットフォーム非依存処理を呼ぶ
 #if UNITY_STANDALONE_WIN
+    private void RawKeyDownHandlerForWin(RawKey key)
+    {
+        EventBus.Instance.NotifyRawKeyDown(key);
+    }
     private void KeyDownHandlerForWin(RawKey key)
     {
-        if (!dictToKeyID_FromRawKey.ContainsKey(key)) {
+        if (!dicts.dictToKeyID_FromRawKey.ContainsKey(key)) {
             Debug.Log($"No KeyID for RawKey : {key.ToString()}");
             return;
         }
-        else OnKeyDown(ToKeyID_FromRawKey(key));
+        else OnKeyDown(dicts.ToKeyID_FromRawKey(key));
     }
     private void KeyUpHandlerForWin(RawKey key)
     {
-        if (key.ToString() == "Shift") OnShiftKeyUp();
-    }
-    private ushort ToKeyID_FromRawKey(RawKey key)
-    {
-        return dictToKeyID_FromRawKey[key];
+        string strkey = key.ToString();
+        if (strkey == "Shift" || strkey == "RightShift" || strkey == "LeftShift") OnShiftKeyUp();
     }
 #endif
 
-    // ここから、プラットフォームに依存しない処理
-    // この時点までで、入力は全て KeyID に変換されている
 
-    // KeyID と CharID（Key にアサインされた文字）間の変換
-    public static ushort ToKeyID_FromCharID(ushort charID)
-    {
-        return dictToKeyID_FromCharID[charID];
-    }
-    public static ushort ToCharID_FromKeyID(ushort keyID)
-    {
-        return dictToCharID_FromKeyID[keyID];
-    }
-
-    // Char と CharID 間の変換
-    public static char ToChar_FromCharID(ushort charID)
-    {
-        return dictToChar_FromCharID[charID];
-    }
-    public static ushort ToCharID_FromChar(char c)
-    {
-        return dictToCharID_FromChar[c];
-    }
-
-
-    // イベントハンドラ
-
-    /// KeyID が特殊文字 100 ~ であれば、それぞれのイベントを実行
-    ///         通常文字 0 ~ 96 であれば、OnNormalKeyDown() を実行
+    // EventBus にイベント発生を通知するメソッド群
+    /// KeyID が特殊文字 100 ~ であれば、それぞれのメソッドを呼ぶ
+    ///         シフト 0 | 1 であれば、OnShiftKeyDown() を実行
+    ///         通常文字 2 ~ 50 であれば、シフト判別後 OnNormalKeyDown() を実行
     ///         ※ ただし、CharID が割り振られていない 2 キーの場合は、処理を実行しない
     private void OnKeyDown(ushort keyID)
     {
         ushort retkey = keyID;
-        // Space にはシフト関係無しなので、シフト処理に移行させない
-        if (retkey == 0) OnNormalKeyDown(0);
-        else if (retkey == 100) OnShiftKeyDown();
-        else if (retkey == 101) OnReturnKeyDown();
-        else if (retkey == 102) OnEscKeyDown();
+        if (retkey == 0 || retkey == 1) OnShiftKeyDown(); // RawKey:16
+        else if (retkey == 100) OnReturnKeyDown(); // RawKey:13
+        else if (retkey == 101) OnEscKeyDown(); // RawKey:27
+        // KeyID:2 (Preset:Space) にはシフト関係無しなので、シフト処理に移行させない
+        else if (retkey == 2) OnNormalKeyDown(0); // CharID of Space: 0
         else
         {
             bool shifted = false;
             if (_shifted > 0) shifted = true;
-            if (shifted) retkey += GameMainManager.NumOfUniqueChars;
+            if (shifted) retkey += 48;
 
-            if (!dictToCharID_FromKeyID.ContainsKey(retkey))
+            if (!dicts.dictToCharID_FromKeyID.ContainsKey(retkey))
                 Debug.Log($"KeyID {retkey} に CharID がアサインされていません。");
-            else OnNormalKeyDown(ToCharID_FromKeyID(retkey));
+            else OnNormalKeyDown(dicts.ToCharID_FromKeyID(retkey));
         }
 
     }
@@ -193,10 +123,12 @@ public class MyInputManager : MonoBehaviour
     private void OnShiftKeyDown()
     {
         _shifted++;
+        if (_shifted > 2) _shifted = 2;
     }
     private void OnShiftKeyUp()
     {
         _shifted--;
+        if (_shifted < 0) _shifted = 0;
     }
     private void OnReturnKeyDown()
     {
@@ -207,11 +139,12 @@ public class MyInputManager : MonoBehaviour
         EventBus.Instance.NotifyEscKeyDown();
     }
 
-    /// キーバインド用
-#if UNITY_STANDALONE_WIN
-    private void OnRawKeyDown(RawKey key) {
-        EventBus.Instance.NotifyRawKeyDown(key);
+    // イベントハンドラ
+    private void KeyBindChangedHandler()
+    {
+        keyBind.LoadFromJson(0);
+        dicts = new KeyBindDicts(keyBind);
     }
-#endif
+
 
 }

@@ -21,7 +21,16 @@ public class SimpleConfigurerManager : MonoBehaviour
     }
     public void onMissLimitEndEdit()
     {
-        if (missLimitInput == null || int.Parse(missLimitInput.GetComponent<TMP_InputField>().text) > 999 || int.Parse(missLimitInput.GetComponent<TMP_InputField>().text) < 0)
-            missLimitInput.GetComponent<TMP_InputField>().text = "360";
+        int misslim;
+        if (missLimitInput.GetComponent<TMP_InputField>().text == null) misslim = 50;
+        else
+        {
+            misslim = int.Parse(missLimitInput.GetComponent<TMP_InputField>().text);
+        }
+        if (misslim > 360) misslim = 360;
+        else if (misslim < 0) misslim = 0;
+
+        missLimitInput.GetComponent<TMP_InputField>().text = misslim.ToString();
+        PlayerPrefs.SetInt("MissLimit", misslim);
     }
 }
