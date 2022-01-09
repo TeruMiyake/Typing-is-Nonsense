@@ -23,6 +23,6 @@ This software includes the work that is distributed in the [Apache License 2.0](
 - [Roboto Mono - Google Fonts](https://fonts.google.com/specimen/Roboto+Mono)
 
 
-This software includes the work that is distributed in the [SIL Open Font License (OFL)](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
-このソフトウェアには、[SIL Open Font License (OFL)](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL) で配布されている製作物が含まれています。
+This software includes the work that is distributed in the [SIL Open Font License (OFL)](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).  
+このソフトウェアには、[SIL Open Font License (OFL)](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL) で配布されている製作物が含まれています。  
 - [Noto Sans Japanese](https://fonts.google.com/noto/specimen/Noto+Sans+JP)
