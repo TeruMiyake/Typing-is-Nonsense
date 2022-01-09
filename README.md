@@ -7,7 +7,6 @@ Typing Competition Game on Random Character String
 ### Completely Nonsense
 *Excessively trained typing skill is nonsense, and what about it?*
 - Types randomly created character (and symbol) string.
-![sample01](https://terum.jp/typing/img/sample01.png)
 ![sample02](https://terum.jp/typing/img/sample02.png)
 
 ### Insanely Flexible
