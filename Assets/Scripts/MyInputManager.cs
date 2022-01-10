@@ -84,8 +84,11 @@ public class MyInputManager : MonoBehaviour
     }
     private void KeyUpHandlerForWin(RawKey key)
     {
-        string strkey = key.ToString();
-        if (strkey == "Shift" || strkey == "RightShift" || strkey == "LeftShift") OnShiftKeyUp();
+        if (dicts.dictToKeyID_FromRawKey.ContainsKey(key))
+        {
+            ushort keyID = dicts.ToKeyID_FromRawKey(key);
+            if (keyID == 0 || keyID == 1) OnShiftKeyUp();
+        }
     }
 #endif
 

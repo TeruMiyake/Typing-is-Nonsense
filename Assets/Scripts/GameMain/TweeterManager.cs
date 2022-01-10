@@ -137,7 +137,7 @@ public class TweeterManager : MonoBehaviour
     public void OnNormalKeyDown(ushort charID)
     {
         if (charID == 7) OnGenerateTweetButtonClick();
-        if (charID == 4) OnCopyToClickboardButtonClick();
+        if (charID == 3) OnCopyToClickboardButtonClick();
         if (charID == 10) OnJumpToWebsiteButtonClick();
     }
 

@@ -12,6 +12,7 @@ public class GameMainManager : MonoBehaviour
     enum GameState
     {
         Waiting,
+        Countdown,
         TrialOn,
         Completed,
         Canceled,
@@ -40,6 +41,7 @@ public class GameMainManager : MonoBehaviour
     public GameObject[] LapTimeTMP;
     public GameObject[] LapMissTMP;
     public GameObject TotalCPSTMP;
+    TextMeshProUGUI countDownTMPUGUI;
 
 
     // トライアル毎のデータ保管
@@ -83,6 +85,10 @@ public class GameMainManager : MonoBehaviour
         // 部下を見つける
         tweeter = GameObject.Find("Tweeter").GetComponent<TweeterManager>();
 
+        // 制御すべきオブジェクトなどの取得と初期化
+        countDownTMPUGUI = GameObject.Find("CountDownTMP").GetComponent<TextMeshProUGUI>();
+        countDownTMPUGUI.text = "";
+
         // 表示制御
         tweeter.SetVisible(false);
 
@@ -105,7 +111,24 @@ public class GameMainManager : MonoBehaviour
     void Update()
     {
         // Completed, Canceled でも TrialInfo は必要だが、(キャンセル|完了) に描画しているからここでは不要
-        if (gameState == GameState.TrialOn) UpdateTrialInfo();
+        if (gameState == GameState.Countdown)
+        {
+            long ms = myStopwatch.ElapsedMilliseconds;
+            if (ms >= 3000) {
+                countDownTMPUGUI.text = "";
+                StartTrial();
+            }
+            else if (ms >= 2000)
+            {
+                countDownTMPUGUI.text = "1";
+            }
+            else if (ms >= 1000)
+            {
+                countDownTMPUGUI.text = "2";
+            }
+            else countDownTMPUGUI.text = "3";
+        }
+        else if (gameState == GameState.TrialOn) UpdateTrialInfo();
     }
     void OnDestroy()
     {
@@ -124,19 +147,24 @@ public class GameMainManager : MonoBehaviour
     }
 
     // 状態制御メソッド
-    void StartTrial()
+    void StartCountdown()
     {
+        gameState = GameState.Countdown;
+
+        // カウントダウンスタート
+        myStopwatch.Restart();
+
         // 簡易設定中は動かせない ※シフト絡みのバグがここに眠ってるかも
         if (missLimitInput.GetComponent<TMP_InputField>().isFocused) return;
 
         // 簡易設定を停止
         missLimitInput.GetComponent<TMP_InputField>().readOnly = true;
 
-         // 画面表示の初期化
-         TotalTimeTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
+        // 画面表示の初期化
+        TotalTimeTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
         TotalMissTMP.GetComponent<TextMeshProUGUI>().text = $"0";
         TotalCPSTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
-        if (gameState != GameState.Waiting)
+        if (assignedCharTMPs != null)
             foreach (GameObject obj in assignedCharTMPs) Destroy(obj);
         tweeter.SetVisible(false);
 
@@ -166,12 +194,20 @@ public class GameMainManager : MonoBehaviour
             if (rnd_charID >= keyBind.NullKeyMap[1]) rnd_charID++;
 
             nowTrialData.trialAssignment_CharID[i] = rnd_charID;
-            nowTrialData.trialAssignment_Char[i] = dicts.ToChar_FromCharID(rnd_charID);
         }
 
-        Debug.Log(string.Join(" ", nowTrialData.trialAssignment_CharID));
-        Debug.Log(string.Join(" ", nowTrialData.trialAssignment_Char));
-
+        // RNGCryptoServiceProvider は IDisposable インターフェイスを実装していて、使用が完了したら型を破棄しなきゃいけないらしい（公式ドキュメントより）
+        // IDisposable インターフェイスには Dispose() というメソッドだけが実装されている
+        // これを継承するクラスは、「リソースを抱え込んでるから使い終わったら（GC を待たず）Dispose() で破棄した方がいい」と考えればいいだろう
+        rng.Dispose();
+    }
+    /// <summary>
+    /// トライアル開始メソッド
+    /// カウントダウン終了時に Update() から呼び出される
+    /// </summary>
+    void StartTrial()
+    {
+        gameState = GameState.TrialOn;
 
         // 課題文字の描画
         assignedCharTMPs = new GameObject[assignmentLength];
@@ -184,20 +220,14 @@ public class GameMainManager : MonoBehaviour
         {
             assignedCharTMPs[i] = Instantiate(AssignedCharTMPPrefab, asg.transform);
             TextMeshProUGUI assignedCharTMPUGUI = assignedCharTMPs[i].GetComponent<TextMeshProUGUI>();
-            assignedCharTMPUGUI.text = nowTrialData.trialAssignment_Char[i].ToString();
+            assignedCharTMPUGUI.text = dicts.ToChar_FromCharID(nowTrialData.trialAssignment_CharID[i]).ToString();
 
             // 表示場所の指定
             assignedCharTMPs[i].GetComponent<RectTransform>().localPosition = new Vector3(displayInitX + displayCharXdiff * (i % lapLength), displayInitY + displayCharYdiff * (i / lapLength), 0);
             //assignedCharTMPs[i].GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
         }
 
-        // RNGCryptoServiceProvider は IDisposable インターフェイスを実装していて、使用が完了したら型を破棄しなきゃいけないらしい（公式ドキュメントより）
-        // IDisposable インターフェイスには Dispose() というメソッドだけが実装されている
-        // これを継承するクラスは、「リソースを抱え込んでるから使い終わったら（GC を待たず）Dispose() で破棄した方がいい」と考えればいいだろう
-        rng.Dispose();
-
         // 処理が終わってからゲーム開始＆ストップウォッチを開始
-        gameState = GameState.TrialOn;
         myStopwatch.Restart();
 
         UpdateTrialInfo();
@@ -251,7 +281,7 @@ public class GameMainManager : MonoBehaviour
         nowTrialData.lapTime[lap] = time;
         // nowTrialData にトータルタイム
 
-        Debug.Assert(gameState == GameState.TrialOn);
+        Debug.Assert(gameState == GameState.TrialOn || gameState == GameState.Countdown);
         if (nowTrialData.totalMiss <= nowTrialData.missLimit) gameState = GameState.Canceled;
         else gameState = GameState.Failed;
 
@@ -346,14 +376,14 @@ public class GameMainManager : MonoBehaviour
     // キャンセル（Esc）時の totalTime は キャンセル時基準ではなく、最後の正解打鍵orミス打鍵時をとるため。
     public void OnBackButtonClick()
     {
-        if (gameState == GameState.TrialOn) CancelTrial();
+        if (gameState == GameState.TrialOn || gameState == GameState.Countdown) CancelTrial();
         //else if (isCompleted) ;
         else MySceneManager.ChangeSceneRequest("TitleScene");
     }
     public void OnGameStartButtonClick()
     {
-        if (gameState == GameState.TrialOn) return;
-        else StartTrial();
+        if (gameState == GameState.TrialOn || gameState == GameState.Countdown) return;
+        else StartCountdown();
     }
     public void OnTweeterButtonClick()
     {
@@ -363,20 +393,23 @@ public class GameMainManager : MonoBehaviour
     }
     // OnNormalKeyDown() で時間を計測
     // トライアル中の情報表示は Update() 内でタイマーを止めて雑に測ればいいが、ラップ・トライアル完了時の時間計測（キー押下にかかった時間）は正確にとる必要があるため。
-    [System.Obsolete("バインド機能つけたら、文字の判別方法を変更要")]
     void OnNormalKeyDown(ushort charID)
     {
-        if (gameState != GameState.TrialOn) {
+        // ゲーム外
+        if (gameState != GameState.TrialOn && gameState != GameState.Countdown) {
             if (charID == 0) // default: Space
                 OnTweeterButtonClick();
             else return;
         }
+        // ここからゲーム中
+        // ゲーム中で正打鍵
         else if (nowTrialData.trialAssignment_CharID[nowTrialData.typedKeys] == charID)
         {
             nowTrialData.totalTime = myStopwatch.ElapsedMilliseconds;
             Debug.Log($"Correct CharID {charID}:{dicts.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
             OnCorrectKeyDown();
         }
+        // ゲーム中で誤打鍵
         else
         {
             nowTrialData.totalTime = myStopwatch.ElapsedMilliseconds;

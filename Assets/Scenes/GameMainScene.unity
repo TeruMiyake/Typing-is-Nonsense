@@ -4094,6 +4094,7 @@ RectTransform:
   - {fileID: 1522320510}
   - {fileID: 1608750130}
   - {fileID: 757389267}
+  - {fileID: 1947337274}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5293,8 +5294,8 @@ MonoBehaviour:
   m_XRTrackingOrigin: {fileID: 0}
   m_ActionsAsset: {fileID: -944628639613478452, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
   m_PointAction: {fileID: -1654692200621890270, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
-  m_MoveAction: {fileID: -8784545083839296357, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
-  m_SubmitAction: {fileID: 392368643174621059, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
+  m_MoveAction: {fileID: 0}
+  m_SubmitAction: {fileID: 0}
   m_CancelAction: {fileID: 7727032971491509709, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
   m_LeftClickAction: {fileID: 3001919216989983466, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
   m_MiddleClickAction: {fileID: -2185481485913320682, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
@@ -5430,7 +5431,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 9098913b58df82343a2d65cc82bcb117, type: 3}
+  m_Actions: {fileID: -944628639613478452, guid: 588136c3e62fe1b4f9ef78d1b3ab35b9, type: 3}
   m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 1836079911}
   m_DeviceLostEvent:
@@ -5444,593 +5445,57 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents:
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 1ee36f4b-4e18-43e1-af48-2a691893feef
-    m_ActionName: MainMap/a[/Keyboard/a]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 63be9aa8-611e-4559-9067-4d0ab9c0a640
-    m_ActionName: MainMap/b[/Keyboard/b]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 19e4964f-ca57-4ec8-b144-d089292ec504
-    m_ActionName: UI/Click[/Mouse/leftButton]
+      m_Calls: []
+    m_ActionId: 351f2ccd-1f9f-44bf-9bec-d62ac5c5f408
+    m_ActionName: Player/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: e62a63cd-7445-4c47-99f5-2e9023c4a464
-    m_ActionName: UI/Point[/Mouse/position]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: a93c1cb5-c204-4be5-bc87-74812db6eb43
-    m_ActionName: MainMap/c[/Keyboard/c]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: f10c1df3-e81c-4980-b912-182eb61f9efd
-    m_ActionName: MainMap/d[/Keyboard/d]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: bf460813-c481-4bb5-9181-3fd84f0774cc
-    m_ActionName: MainMap/e[/Keyboard/e]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 331ccad3-5bdd-43b6-8942-8b13a58a2d57
-    m_ActionName: MainMap/f[/Keyboard/f]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 6b948e05-2ab2-4d90-9c51-e5a4cf206665
-    m_ActionName: MainMap/g[/Keyboard/g]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 039fbe03-0dd3-41a5-a71c-4cb3ec9c6da0
-    m_ActionName: MainMap/h[/Keyboard/h]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 1ae54b84-38ac-4301-a57f-a30ca3240e26
-    m_ActionName: MainMap/i[/Keyboard/i]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 7b66b8ba-c665-42a3-bbb7-7376ac9d897e
-    m_ActionName: MainMap/j[/Keyboard/j]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 3d373db6-3544-4cc2-8fc8-228e75caf27b
-    m_ActionName: MainMap/k[/Keyboard/k]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 3201dd76-ed19-4347-8de3-b9e5263e4256
-    m_ActionName: MainMap/l[/Keyboard/i]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 1e81f189-5afe-4eed-bd27-abb387a56038
-    m_ActionName: MainMap/m[/Keyboard/m]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: de4bf648-2183-41e9-b4d7-c1f807a6c642
-    m_ActionName: MainMap/n[/Keyboard/n]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 95545a5a-4005-4ada-aea1-322db829730e
-    m_ActionName: MainMap/o[/Keyboard/o]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 89dbd8de-af4a-4427-a928-5b233aa7199c
-    m_ActionName: MainMap/p[/Keyboard/p]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 3e58a313-06ac-47e9-9d24-fecea7513dde
-    m_ActionName: MainMap/q[/Keyboard/q]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: d1722f81-34ad-437e-8843-3ad9e64ed866
-    m_ActionName: MainMap/r[/Keyboard/r]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 427ae1f6-8b6f-44a4-b866-925749f6b97f
-    m_ActionName: MainMap/s[/Keyboard/s]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 3cbfc6bd-6599-4118-8fa8-4aa686c6c74d
-    m_ActionName: MainMap/t[/Keyboard/t]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: b36285cd-44de-4d9e-87b7-ad9ff697f0f7
-    m_ActionName: MainMap/u[/Keyboard/u]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 584ff34e-edc0-4990-84cd-6a06090749db
-    m_ActionName: MainMap/v[/Keyboard/v]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 2ef3702f-f6d8-4c35-ad92-ff343284e63c
-    m_ActionName: MainMap/w[/Keyboard/w]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 33e8ca53-bf04-4022-bb4b-fd1e18809776
-    m_ActionName: MainMap/x[/Keyboard/x]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: abe0962f-d8e0-405b-8c07-c770d0e267a5
-    m_ActionName: MainMap/y[/Keyboard/y]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnNormalKey
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: d815396e-6c85-4355-9f4a-2676727ad519
-    m_ActionName: MainMap/z[/Keyboard/z]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnShift
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 066d23c9-661c-44fe-b30a-a4f437c970b7
-    m_ActionName: MainMap/Shift 1[/Keyboard/leftShift]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnShift
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: f3493b04-a54d-4a2a-acf2-bc70bad559b6
-    m_ActionName: MainMap/Shift 2[/Keyboard/rightShift]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnSpace
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 6bd24ba3-1f85-4839-839e-8df5e3d0ede0
-    m_ActionName: MainMap/Space[/Keyboard/space]
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1866556426}
-        m_TargetAssemblyTypeName: GameMainManager, Assembly-CSharp
-        m_MethodName: OnEsc
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 197201bf-2613-4b9c-83e0-7b6df2348e11
-    m_ActionName: MainMap/Esc[/Keyboard/escape]
+    m_ActionId: 6b444451-8a00-4d00-a97e-f47457f736a8
+    m_ActionName: Player/Look[/Mouse/delta,/Pen/delta]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 990c80ac-ca6d-4a3e-9b01-3b9871a310cc
-    m_ActionName: MainMap/26[/Keyboard/1]
+    m_ActionId: 6c2ab1b8-8984-453a-af3d-a3c78ae1679a
+    m_ActionName: Player/Fire[/Mouse/leftButton]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 31eb5ed8-cc69-4b78-9266-0096785924e5
-    m_ActionName: MainMap/27[/Keyboard/2]
+    m_ActionId: c95b2375-e6d9-4b88-9c4c-c5e76515df4b
+    m_ActionName: UI/Navigate[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: df02c31b-1205-4b59-887f-cf06deb0dd90
-    m_ActionName: MainMap/28[/Keyboard/3]
+    m_ActionId: 7607c7b6-cd76-4816-beef-bd0341cfe950
+    m_ActionName: UI/Submit[/Keyboard/enter]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 54e9b165-926c-405d-9f05-859010b9b450
-    m_ActionName: MainMap/29[/Keyboard/4]
+    m_ActionId: 15cef263-9014-4fd5-94d9-4e4a6234a6ef
+    m_ActionName: UI/Cancel[/Keyboard/escape]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: b21d4f71-0e9f-47c7-8865-18fd3e863917
-    m_ActionName: MainMap/30[/Keyboard/5]
+    m_ActionId: 32b35790-4ed0-4e9a-aa41-69ac6d629449
+    m_ActionName: UI/Point[/Mouse/position,/Pen/position]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 636be5c6-b67d-4716-8910-9949196790f8
-    m_ActionName: MainMap/31[/Keyboard/6]
+    m_ActionId: 3c7022bf-7922-4f7c-a998-c437916075ad
+    m_ActionName: UI/Click[/Mouse/leftButton,/Pen/tip]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 45f98113-84a7-4dca-93fc-cd5bb740ecb8
-    m_ActionName: MainMap/32[/Keyboard/7]
+    m_ActionId: 0489e84a-4833-4c40-bfae-cea84b696689
+    m_ActionName: UI/ScrollWheel[/Mouse/scroll]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 9b797ba1-9ac3-4163-a7d4-fff176baea29
-    m_ActionName: MainMap/33[/Keyboard/8]
+    m_ActionId: dad70c86-b58c-4b17-88ad-f5e53adf419e
+    m_ActionName: UI/MiddleClick[/Mouse/middleButton]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 5d940ee9-50c5-476c-8c90-5a7e8a2617e6
-    m_ActionName: MainMap/34[/Keyboard/9]
+    m_ActionId: 44b200b1-1557-4083-816c-b22cbdf77ddf
+    m_ActionName: UI/RightClick[/Mouse/rightButton]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: e61c0759-f720-482a-bde9-c4158d098fd8
-    m_ActionName: MainMap/35[/Keyboard/0]
+    m_ActionId: 24908448-c609-4bc3-a128-ea258674378a
+    m_ActionName: UI/TrackedDevicePosition
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 03d375fd-8fac-4ace-9ba4-9d8fe5b187e4
-    m_ActionName: MainMap/36[/Keyboard/minus]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: aaea2ac2-622b-413b-971d-2baec31c8365
-    m_ActionName: MainMap/37[/Keyboard/equals]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: a31f8bce-2c8c-4a45-8ad7-226c5c518a07
-    m_ActionName: MainMap/38
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: ba181b0f-8ac4-42ea-b577-7d33ad848d72
-    m_ActionName: MainMap/39
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 7919865a-f156-460d-aead-8186408f266a
-    m_ActionName: MainMap/40
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: f0e37fb8-54db-4035-a883-a649e0a85da1
-    m_ActionName: MainMap/41
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 54ef8010-d509-475a-b5c2-7755893e0fe3
-    m_ActionName: MainMap/42
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 04aa773b-aa8a-489e-b655-daa4a15ef236
-    m_ActionName: MainMap/43
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 2e79ff1b-6711-4f90-b433-d9fd2d67e645
-    m_ActionName: MainMap/44
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 522ba3d2-a2f2-49d9-a97b-af3fba8ad7c4
-    m_ActionName: MainMap/45
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 771b5cbe-2f29-4111-a613-ec5ebdc9000f
-    m_ActionName: MainMap/46
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 158a84cf-f8c6-4d72-9087-69c6479f7679
-    m_ActionName: MainMap/47
+    m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
+    m_ActionName: UI/TrackedDeviceOrientation
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: UI
@@ -6298,6 +5763,140 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7937734796048228435, guid: c47de1676d6855d4a98049dd10092cbe, type: 3}
   m_PrefabInstance: {fileID: 1042687061}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1947337273
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1947337274}
+  - component: {fileID: 1947337276}
+  - component: {fileID: 1947337275}
+  m_Layer: 5
+  m_Name: CountDownTMP
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1947337274
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1947337273}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1476558493}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -150}
+  m_SizeDelta: {x: 300, y: 300}
+  m_Pivot: {x: 0, y: 1}
+--- !u!114 &1947337275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1947337273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: 3
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4279900736
+  m_fontColor: {r: 0.2509804, g: 0.10196079, b: 0.10196079, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 240
+  m_fontSizeBase: 240
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_enableWordWrapping: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 1
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1947337276
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1947337273}
+  m_CullTransparentMesh: 1
 --- !u!1 &1955084248
 GameObject:
   m_ObjectHideFlags: 0

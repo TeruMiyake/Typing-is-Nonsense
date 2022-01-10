@@ -12,29 +12,30 @@ using UnityRawInput;
 #endif
 
 
+[System.Serializable]
 public class TrialData
 {
     // ミスリミット
     public ushort missLimit = 50;
     // 正しく打ったキー数 = 次打つキーID。0 から始まり assignmentLength で打切
-    public int typedKeys = 0;
+    public int typedKeys = 0; // 本質
     // 現在何ラップ目か 1-indexed
-    public int nowLap = 1;
+    public int nowLap = 1; // 非本質（typedKeysから算出可）
     // トータルタイム・ラップタイム・各正解打鍵タイム
     // それぞれのタイム・ミスは全て「合計タイム」で入れるので、打鍵時間を出すには引き算が必要
     // lap, key の配列の [0] は番兵
-    public long totalTime = 0;
-    public long[] lapTime;
-    public long[] keyTime;
+    public long totalTime = 0; // 微妙（typedKeysとkeyTimeから算出はできる）
+    public long[] lapTime; // 非本質（keyTimeから算出可）
+    public long[] keyTime; // 本質
     // トータルミス・ラップミス・各キー辺りミス（要るか？）
     // それぞれのタイム・ミスは全て「合計タイム」で入れるので、打鍵時間を出すには引き算が必要
     // lap, key の配列の [0] は番兵
-    public int totalMiss = 0;
-    public int[] lapMiss;
-    public int[] keyMiss;
+    public int totalMiss = 0; // 半本質　keyMiss を入れるなら本質ではないが、合計を出すのに時間がかかるからあった方がいい
+    public int[] lapMiss; // 非本質　上記と同様時間がかからんでもないが……
+    public int[] keyMiss; // 本質？　必要かは置いておいて、この機能をつけるならこれが本質
 
-    public ushort[] trialAssignment_CharID;
-    public char[] trialAssignment_Char;
+    public ushort[] trialAssignment_CharID; // 本質
+    //public char[] trialAssignment_Char; // 非本質
 
     public TrialData(ushort lim, int assignmentLength, int numOfLaps)
     {
@@ -49,7 +50,6 @@ public class TrialData
         keyMiss = Enumerable.Repeat<int>(0, assignmentLength + 1).ToArray();
 
         trialAssignment_CharID = new ushort[assignmentLength];
-        trialAssignment_Char = new char[assignmentLength];
     }
 }
 
@@ -256,6 +256,7 @@ public class Config
     }
 }
 
+[System.Obsolete("When implementing UtilKeyBinding, changes needed.")]
 public class KeyBindDicts
 {
     // KeyID と CharID（Key にアサインされた文字）間の変換
@@ -272,70 +273,6 @@ public class KeyBindDicts
 
     // キーバインド機能をつけたから引数なしのコンストラクタは不要。呼べないようにする
     private KeyBindDicts() { }
-    //public KeyBindDicts()
-    //{
-    //    dictToKeyID_FromCharID = new Dictionary<ushort, ushort>();
-    //    dictToCharID_FromKeyID = new Dictionary<ushort, ushort>();
-    //    dictToChar_FromCharID = new Dictionary<ushort, char>();
-    //    dictToCharID_FromChar = new Dictionary<char, ushort>();
-    //    dictToKeyID_FromRawKey = new Dictionary<RawKey, ushort>();
-
-    //    dictToKeyID_FromRawKey.Add(RawKey.Space, 0);
-    //    for (int i = 0; i <= 25; i++) dictToKeyID_FromRawKey.Add(RawKey.A + (ushort)i, (ushort)(i + 1));
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x31, 27);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x32, 28);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x33, 29);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x34, 30);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x35, 31);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x36, 32);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x37, 33);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x38, 34);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x39, 35);
-    //    dictToKeyID_FromRawKey.Add((RawKey)0x30, 36);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEMMinus, 37);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM7, 38);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM5, 39);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM3, 40);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM4, 41);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEMPlus, 42);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM1, 43);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM6, 44);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEMComma, 45);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEMPeriod, 46);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM2, 47);
-    //    dictToKeyID_FromRawKey.Add(RawKey.OEM102, 48);
-    //    dictToKeyID_FromRawKey.Add(RawKey.Shift, 100);
-    //    dictToKeyID_FromRawKey.Add(RawKey.Return, 102);
-    //    dictToKeyID_FromRawKey.Add(RawKey.Escape, 103);
-
-    //    string deb = "";
-    //    ushort[] rkmap = new ushort[111];
-    //    foreach (var p in dictToKeyID_FromRawKey) rkmap[p.Value] = (ushort)p.Key;
-    //    foreach (var rk in rkmap) deb += ($", {rk}");
-    //    Debug.Log(deb);
-
-    //    // テスト用、とりあえず KeyID と CharID と Char に適当な対応をつける
-    //    string defaultKeyCharMap = " abcdefghijklmnopqrstuvwxyz1234567890-^\0@[;:],./\\ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()\0=~|`{+*}<>?_";
-    //    ushort idx = 0;
-    //    ushort charidx = 0;
-    //    foreach (char c in defaultKeyCharMap)
-    //    {
-    //        if (c == '\0')
-    //        {
-    //            idx++;
-    //        }
-    //        else
-    //        {
-    //            dictToKeyID_FromCharID[charidx] = idx;
-    //            dictToCharID_FromKeyID[idx] = charidx;
-    //            dictToChar_FromCharID[charidx] = c;
-    //            dictToCharID_FromChar[c] = charidx;
-    //            idx++;
-    //            charidx++;
-    //        }
-
-    //    }
-    //}
     public KeyBindDicts(KeyBind keyBind)
     {
         dictToKeyID_FromCharID = new Dictionary<ushort, ushort>();
@@ -348,7 +285,6 @@ public class KeyBindDicts
         for (int i = 0; i < 51; i++)
         {
             // 0 == null
-            if (keyBind.RawKeyMap[i] == 0) continue;
             dictToKeyID_FromRawKey[(RawKey)(keyBind.RawKeyMap[i])] = (ushort)i;
         }
         // Char <-> CharID
@@ -369,9 +305,6 @@ public class KeyBindDicts
             }
         }
         // 特殊キーの処理（そのうちバインドを Config などから流し込む機能をつける）
-        dictToKeyID_FromRawKey[RawKey.Shift] = 0; // 16
-        dictToKeyID_FromRawKey[RawKey.RightShift] = 0;
-        dictToKeyID_FromRawKey[RawKey.LeftShift] = 1;
         dictToKeyID_FromRawKey[RawKey.Return] = 100; // 13
         dictToKeyID_FromRawKey[RawKey.Escape] = 101; // 27
     }
