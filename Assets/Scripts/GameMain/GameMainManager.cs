@@ -29,7 +29,7 @@ public class GameMainManager : MonoBehaviour
     TweeterManager tweeter;
 
     // 簡易設定オブジェクト
-    public GameObject missLimitInput;
+    public GameObject MissLimitInput;
 
     // 課題文字表示用プレハブ
     public GameObject AssignedCharTMPPrefab;
@@ -46,6 +46,10 @@ public class GameMainManager : MonoBehaviour
 
     // トライアル毎のデータ保管
     TrialData nowTrialData;
+
+    // nowTrialData.AllInputIDs 用の定数
+    const ushort shiftdownInputID = 97;
+    const ushort shiftupInputID = 98;
 
     // ここから基本設定
 
@@ -66,12 +70,11 @@ public class GameMainManager : MonoBehaviour
     const int displayCharXdiff = 18;
     const int displayCharYdiff = -41;
 
-    // 課題文字の文字数、表示の行数など
+    // TrialData に渡すゲームモード変数と、それが示す意味
+    const int gameMode = 0;
     const int assignmentLength = 360;
     const int lapLength = 36;
     const int numOfLaps = 10;
-
-
 
     // ストップウォッチ
     System.Diagnostics.Stopwatch myStopwatch;
@@ -102,6 +105,8 @@ public class GameMainManager : MonoBehaviour
         EventBus.Instance.SubscribeNormalKeyDown(OnNormalKeyDown);
         EventBus.Instance.SubscribeReturnKeyDown(OnGameStartButtonClick);
         EventBus.Instance.SubscribeEscKeyDown(OnBackButtonClick);
+        EventBus.Instance.SubscribeShiftKeyDown(ShiftKeyDownHandler);
+        EventBus.Instance.SubscribeShiftKeyUp(ShiftKeyUpHandler);
     }
     // Start is called before the first frame update
     void Start()
@@ -135,6 +140,8 @@ public class GameMainManager : MonoBehaviour
         EventBus.Instance.UnsubscribeNormalKeyDown(OnNormalKeyDown);
         EventBus.Instance.UnsubscribeReturnKeyDown(OnGameStartButtonClick);
         EventBus.Instance.UnsubscribeEscKeyDown(OnBackButtonClick);
+        EventBus.Instance.UnsubscribeShiftKeyDown(ShiftKeyDownHandler);
+        EventBus.Instance.UnsubscribeShiftKeyUp(ShiftKeyUpHandler);
     }
 
     // 部下とのやり取り
@@ -146,6 +153,17 @@ public class GameMainManager : MonoBehaviour
             return new System.Tuple<string, TrialData>(gameState.ToString(), nowTrialData);
     }
 
+    // ユーティリティメソッド
+    /// <summary>
+    /// long で保存してあるミリ秒を、表示用の X.XXX s に変える
+    /// </summary>
+    /// <param name="ms"></param>
+    /// <returns></returns>
+    string ToFormattedTime(long ms)
+    {
+        return (ms / 1000).ToString() + "." + (ms % 1000).ToString("000");
+    }
+
     // 状態制御メソッド
     void StartCountdown()
     {
@@ -155,10 +173,10 @@ public class GameMainManager : MonoBehaviour
         myStopwatch.Restart();
 
         // 簡易設定中は動かせない ※シフト絡みのバグがここに眠ってるかも
-        if (missLimitInput.GetComponent<TMP_InputField>().isFocused) return;
+        if (MissLimitInput.GetComponent<TMP_InputField>().isFocused) return;
 
         // 簡易設定を停止
-        missLimitInput.GetComponent<TMP_InputField>().readOnly = true;
+        MissLimitInput.GetComponent<TMP_InputField>().readOnly = true;
 
         // 画面表示の初期化
         TotalTimeTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
@@ -177,7 +195,7 @@ public class GameMainManager : MonoBehaviour
         config.Load();
 
         // nowTrialData の初期化
-        nowTrialData = new TrialData(config.MissLimit, assignmentLength, numOfLaps);
+        nowTrialData = new TrialData(gameMode, config.MissLimit, keyBind);
 
         // 乱数を生成して nowTrialData にセット
         RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
@@ -193,7 +211,7 @@ public class GameMainManager : MonoBehaviour
             if (rnd_charID >= keyBind.NullKeyMap[0]) rnd_charID++;
             if (rnd_charID >= keyBind.NullKeyMap[1]) rnd_charID++;
 
-            nowTrialData.trialAssignment_CharID[i] = rnd_charID;
+            nowTrialData.TaskCharIDs[i] = rnd_charID;
         }
 
         // RNGCryptoServiceProvider は IDisposable インターフェイスを実装していて、使用が完了したら型を破棄しなきゃいけないらしい（公式ドキュメントより）
@@ -209,6 +227,10 @@ public class GameMainManager : MonoBehaviour
     {
         gameState = GameState.TrialOn;
 
+        // TrialData.AllInputIDs[0] に初期シフト状態を格納
+        nowTrialData.AllInputIDs.Add(MyInputManager.GetShiftState());
+        nowTrialData.AllInputTime.Add(0);
+
         // 課題文字の描画
         assignedCharTMPs = new GameObject[assignmentLength];
 
@@ -220,7 +242,7 @@ public class GameMainManager : MonoBehaviour
         {
             assignedCharTMPs[i] = Instantiate(AssignedCharTMPPrefab, asg.transform);
             TextMeshProUGUI assignedCharTMPUGUI = assignedCharTMPs[i].GetComponent<TextMeshProUGUI>();
-            assignedCharTMPUGUI.text = dicts.ToChar_FromCharID(nowTrialData.trialAssignment_CharID[i]).ToString();
+            assignedCharTMPUGUI.text = dicts.ToChar_FromCharID(nowTrialData.TaskCharIDs[i]).ToString();
 
             // 表示場所の指定
             assignedCharTMPs[i].GetComponent<RectTransform>().localPosition = new Vector3(displayInitX + displayCharXdiff * (i % lapLength), displayInitY + displayCharYdiff * (i / lapLength), 0);
@@ -234,58 +256,70 @@ public class GameMainManager : MonoBehaviour
     }
     void CompleteLap()
     {
-        int lap = nowTrialData.nowLap;
+        int lap = nowTrialData.TypedKeys / lapLength;
         // nowTrialData へのラップタイムの入力
-        nowTrialData.lapTime[lap] = nowTrialData.totalTime;
+        // 並列処理の関係でもしかしたら KeyTime がズレるのかもしれないので、ここでは .TotalTime を使っていない
+        nowTrialData.SetLapTime(lap, nowTrialData.CorrectKeyTime[nowTrialData.TypedKeys]);
         // nowTrialData へのラップミスの入力
-        nowTrialData.lapMiss[lap] = nowTrialData.totalMiss;
+        nowTrialData.LapMiss[lap] = nowTrialData.TotalMiss;
 
         // 最終ラップでない時のみ、ラップ番号を更新（現在ラップが境界外に出てしまうことを防ぐ）
         // また、次のラップも前のミス数と同じにする（ 0 のままだと表示が崩れる）
         if (lap < numOfLaps)
-        {
-            nowTrialData.lapMiss[lap+1] = nowTrialData.lapMiss[lap];
-            nowTrialData.nowLap++;
-        }
+            nowTrialData.LapMiss[lap+1] = nowTrialData.LapMiss[lap];
     }
+    /// <summary>
+    /// トライアル完了時に固有の処理を行う。トライアル終了時の共通処理は OnEndTrial()
+    /// </summary>
     void CompleteTrial()
     {
         // ストップウォッチを止めるが、ここの時間はもはや関係無い（キー打鍵時に計測しているため）
         myStopwatch.Stop();
 
+        // nowTrialData の更新
+        nowTrialData.IsTerminated = false;
+
         Debug.Assert(gameState == GameState.TrialOn);
         gameState = GameState.Completed;
 
-        // 完了してからトライアル情報の描画（トライアル中と計測の仕方が違うため）
-        UpdateTrialInfo();
-
-        // ボタンの表示変更
-        GameObject.Find("StartButton").GetComponent<UnityEngine.UI.Button>().interactable = true;
-        GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Back To Title [Esc]";
-
-        // 簡易設定を再起動
-        missLimitInput.GetComponent<TMP_InputField>().readOnly = false;
+        // 終了時共通処理の呼び出し
+        OnEndTrial();
     }
     /// <summary>
-    /// ミス制限を超えると -> Failed, Esc -> Canceled
+    /// トライアル中断時に固有の処理を行う。トライアル終了時の共通処理は OnEndTrial()
+    /// ミス制限を超えると -TotalTime Failed, Esc -> Canceled
     /// </summary>
     void CancelTrial()
     {
-        // ストップウォッチを止めるが、ここの時間はもはや関係無い（キー打鍵時に計測しているため）
+        // ストップウォッチを止めるが、ここの時間はもはや関係無い（OnNormalKeyDwn() で計測しているため）
         myStopwatch.Stop();
 
-        long time = nowTrialData.totalTime;
-        int keys = nowTrialData.typedKeys;
-        // nowTrialData にラップタイムを入力
-        int lap = nowTrialData.nowLap;
-        nowTrialData.lapTime[lap] = time;
-        // nowTrialData にトータルタイム
+        // nowTrialData の更新
+        nowTrialData.IsTerminated = true;
+
+        // TrialData に最終ラップタイムをセット
+        int lap = nowTrialData.TypedKeys / lapLength + 1;
+        nowTrialData.SetLapTime(lap, nowTrialData.TotalTime);
 
         Debug.Assert(gameState == GameState.TrialOn || gameState == GameState.Countdown);
-        if (nowTrialData.totalMiss <= nowTrialData.missLimit) gameState = GameState.Canceled;
+        if (nowTrialData.TotalMiss <= nowTrialData.MissLimit) gameState = GameState.Canceled;
         else gameState = GameState.Failed;
 
-        // キャンセルしてからトライアル情報の描画（トライアル中と計測の仕方が違うため）
+        // 終了時共通処理の呼び出し
+        OnEndTrial();
+    }
+    /// <summary>
+    /// CompleteTrial() と CancelTrial() から呼び出す、トライアル終了時の共通処理
+    /// </summary>
+    void OnEndTrial()
+    {
+        // nowTrialData の設定
+        nowTrialData.DateTimeWhenFinished = System.DateTime.Now;
+
+        // データの保存
+        nowTrialData.SaveLog();
+
+        // トライアル情報の描画（トライアル中と計測の仕方が違うため、終了処理後に呼び出し）
         UpdateTrialInfo();
 
         // ボタンの表示変更
@@ -293,7 +327,7 @@ public class GameMainManager : MonoBehaviour
         GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Back To Title [Esc]";
 
         // 簡易設定を再起動
-        missLimitInput.GetComponent<TMP_InputField>().readOnly = false;
+        MissLimitInput.GetComponent<TMP_InputField>().readOnly = false;
     }
 
     // 表示制御
@@ -304,41 +338,54 @@ public class GameMainManager : MonoBehaviour
     {
         Debug.Assert(gameState != GameState.Waiting);
 
-        int lap = nowTrialData.nowLap;
-        long time;
+        int lap = nowTrialData.TypedKeys / lapLength + 1;
+        // トライアル完了時のみ lap > numOfLaps となってしまうので、それを避ける
+        if (lap > numOfLaps) lap = numOfLaps;
+
+        long totalTime;
         // ゲーム中であった場合、リアルな経過時間を使って計算
-        if (gameState == GameState.TrialOn) time = myStopwatch.ElapsedMilliseconds;
+        if (gameState == GameState.TrialOn) totalTime = myStopwatch.ElapsedMilliseconds;
         // ゲーム(完了|キャンセル)後であった場合、最後にキーを打鍵した時間を使って計算
-        else time = nowTrialData.totalTime;
-        int keys = nowTrialData.typedKeys;
-        double cps = (double)(keys * 1000) / time;
+        else totalTime = nowTrialData.TotalTime;
+        int keys = nowTrialData.TypedKeys;
+        double cps = (double)(keys * 1000) / totalTime;
+
+        // テキスト更新用の使い捨て関数
+        void _UpdateText(GameObject obj, string str) => obj.GetComponent<TextMeshProUGUI>().text = str;
 
         // トータルタイムの表示
-        TotalTimeTMP.GetComponent<TextMeshProUGUI>().text = $"{((double)time / 1000):F3}";
+        _UpdateText(TotalTimeTMP, ToFormattedTime(totalTime));
         // トータルミスの表示
-        TotalMissTMP.GetComponent<TextMeshProUGUI>().text = $"{nowTrialData.totalMiss}";
+        _UpdateText(TotalMissTMP, $"{nowTrialData.TotalMiss}");
         // トータル CPS の表示
-        TotalCPSTMP.GetComponent<TextMeshProUGUI>().text = $"{cps:F3}";
+        _UpdateText(TotalCPSTMP, $"{cps:F3}");
         // ラップタイムの表示
-        // 1 ~ lap のループなので注意（lap が 1-indexed のため）
-        // 更に、LapTimeTMP [] は 0-indexed であることにも注意 -> [(i|lap)-1] でアクセス
+        // 1 ~ lap-1 までは nowTrialData に書き込み済み（1-indexed 注意）
+        long[] singleLapTime = new long[lap + 1];
+        singleLapTime[0] = 0;
+        for (int i = 1; i <= lap-1; i++)
+        {
+            singleLapTime[i] = nowTrialData.GetSingleLapTime(i);
+        }
+        // 現在ラップは time を使う
+        // time : ゲーム中ならリアルな打鍵時間、terminated なら最終キー打鍵時間が入っている
+        singleLapTime[lap] = totalTime - nowTrialData.GetLapTime(lap-1);
+        // LapTimeTMP [] は 0-indexed であることにも注意 -> [(i|lap)-1] でアクセス
         for (int i = 1; i <= lap; i++)
         {
-            LapTimeTMP[i - 1].GetComponent<TextMeshProUGUI>().text = $"{(double)(nowTrialData.lapTime[i] - nowTrialData.lapTime[i - 1]) / 1000:F3}";
+            _UpdateText(LapTimeTMP[i - 1], ToFormattedTime(singleLapTime[i]));
         }
-        // ゲーム中であった場合、現在ラップはリアルな経過時間を使って計算
-        if (gameState == GameState.TrialOn) LapTimeTMP[lap - 1].GetComponent<TextMeshProUGUI>().text = $"{(double)(time - nowTrialData.lapTime[lap - 1]) / 1000:F3}";
         // ラップミスの表示
         for (int i = 1; i <= lap; i++)
         {
-            int iLapMiss = nowTrialData.lapMiss[i] - nowTrialData.lapMiss[i - 1];
-            LapMissTMP[i - 1].GetComponent<TextMeshProUGUI>().text = (iLapMiss == 0 ? "" : iLapMiss.ToString());
+            int iLapMiss = nowTrialData.LapMiss[i] - nowTrialData.LapMiss[i - 1];
+            _UpdateText(LapMissTMP[i - 1], iLapMiss == 0 ? "" : iLapMiss.ToString());
         }
         // 終了していないラップは 空白 で埋める
         for (int i = lap + 1; i <= numOfLaps; i++)
         {
-            LapTimeTMP[i - 1].GetComponent<TextMeshProUGUI>().text = "";
-            LapMissTMP[i - 1].GetComponent<TextMeshProUGUI>().text = "";
+            _UpdateText(LapTimeTMP[i - 1], "");
+            _UpdateText(LapMissTMP[i - 1], "");
         }
 
     }
@@ -346,34 +393,39 @@ public class GameMainManager : MonoBehaviour
     // トライアル制御
     void OnCorrectKeyDown()
     {
-        assignedCharTMPs[nowTrialData.typedKeys].GetComponent<TextMeshProUGUI>().color = new UnityEngine.Color(0.25f, 0.15f, 0.15f, 0.1f);
-        // nowTrialData にトータルタイムの入力
-        nowTrialData.typedKeys++;
+        assignedCharTMPs[nowTrialData.TypedKeys].GetComponent<TextMeshProUGUI>().color = new UnityEngine.Color(0.25f, 0.15f, 0.15f, 0.1f);
+
+        // nowTrialData の更新処理
+        // ここでトータルタイムは入力しない（OnNormalButtonClick() で入力してあるため）
+        nowTrialData.TypedKeys++;
+        nowTrialData.CorrectKeyTime[nowTrialData.TypedKeys] = nowTrialData.TotalTime;
+
         // ラップ完了
-        if (nowTrialData.typedKeys % lapLength == 0) CompleteLap();
+        if (nowTrialData.TypedKeys % lapLength == 0) CompleteLap();
         // トライアル完了
-        if (nowTrialData.typedKeys == assignmentLength) CompleteTrial();
+        if (nowTrialData.TypedKeys == assignmentLength) CompleteTrial();
     }
     void OnIncorrectKeyDown()
     {
-        // nowTrialData にトータルミスの入力
-        nowTrialData.totalMiss++;
-        // nowTrialData にラップミスの入力
-        int lap = nowTrialData.nowLap;
-        nowTrialData.lapMiss[lap] = nowTrialData.totalMiss;
+        // ここでトータルタイムは入力しない（OnNormalButtonClick() で入力してあるため）
 
-        if (nowTrialData.totalMiss > nowTrialData.missLimit)
+        // nowTrialData にトータルミスの入力
+        nowTrialData.TotalMiss++;
+        // nowTrialData にラップミスの入力
+        int lap = nowTrialData.TypedKeys / lapLength + 1;
+        nowTrialData.LapMiss[lap] = nowTrialData.TotalMiss;
+
+        if (nowTrialData.TotalMiss > nowTrialData.MissLimit)
         {
             Debug.Log($"ミスが多すぎます。最初からやり直してください。");
             CancelTrial();
         }
-
     }
 
     // イベントハンドラ
     // EventBus に渡して実行してもらう
     // OnBackButtonClick() では時間を測らない
-    // キャンセル（Esc）時の totalTime は キャンセル時基準ではなく、最後の正解打鍵orミス打鍵時をとるため。
+    // キャンセル（Esc）時の TotalTime は キャンセル時基準ではなく、最後の正解打鍵orミス打鍵時をとるため。
     public void OnBackButtonClick()
     {
         if (gameState == GameState.TrialOn || gameState == GameState.Countdown) CancelTrial();
@@ -396,25 +448,50 @@ public class GameMainManager : MonoBehaviour
     void OnNormalKeyDown(ushort charID)
     {
         // ゲーム外
-        if (gameState != GameState.TrialOn && gameState != GameState.Countdown) {
+        if (gameState == GameState.Completed || gameState == GameState.Canceled || gameState == GameState.Failed) {
             if (charID == 0) // default: Space
                 OnTweeterButtonClick();
             else return;
         }
-        // ここからゲーム中
-        // ゲーム中で正打鍵
-        else if (nowTrialData.trialAssignment_CharID[nowTrialData.typedKeys] == charID)
+        else if (gameState == GameState.TrialOn)
         {
-            nowTrialData.totalTime = myStopwatch.ElapsedMilliseconds;
-            Debug.Log($"Correct CharID {charID}:{dicts.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
-            OnCorrectKeyDown();
+            nowTrialData.TotalTime = myStopwatch.ElapsedMilliseconds;
+            // nowTrialData の更新
+            nowTrialData.AllInputIDs.Add(charID);
+            nowTrialData.AllInputTime.Add(nowTrialData.TotalTime);
+            // 正打鍵
+            if (nowTrialData.TaskCharIDs[nowTrialData.TypedKeys] == charID)
+            {
+                OnCorrectKeyDown();
+            }
+            // ゲーム中で誤打鍵
+            else
+            {
+                OnIncorrectKeyDown();
+            }
         }
-        // ゲーム中で誤打鍵
-        else
+        // if (Countdown || Waiting), do nothing
+    }
+    /// <summary>
+    /// シフト状態を元に得られる文字を判定する処理は MyInputManager が行っているが、GameMainManager ではシフトの上下動を TrialData に書き込むため、このハンドラを要する。
+    /// </summary>
+    void ShiftKeyDownHandler()
+    {
+        if (gameState == GameState.TrialOn)
         {
-            nowTrialData.totalTime = myStopwatch.ElapsedMilliseconds;
-            Debug.Log($"Incorrect CharID {charID}:{dicts.ToChar_FromCharID(charID)} was Down @ {nowTrialData.totalTime} ms");
-            OnIncorrectKeyDown();
+            nowTrialData.AllInputIDs.Add(shiftdownInputID);
+            nowTrialData.AllInputTime.Add(myStopwatch.ElapsedMilliseconds);
+        }
+    }
+    /// <summary>
+    /// シフト状態を元に得られる文字を判定する処理は MyInputManager が行っているが、GameMainManager ではシフトの上下動を TrialData に書き込むため、このハンドラを要する。
+    /// </summary>
+    void ShiftKeyUpHandler()
+    {
+        if (gameState == GameState.TrialOn)
+        {
+            nowTrialData.AllInputIDs.Add(shiftupInputID);
+            nowTrialData.AllInputTime.Add(myStopwatch.ElapsedMilliseconds);
         }
     }
 

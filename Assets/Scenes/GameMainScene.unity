@@ -2604,7 +2604,7 @@ RectTransform:
   m_Children:
   - {fileID: 292932433}
   m_Father: {fileID: 1476558493}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -4092,9 +4092,9 @@ RectTransform:
   - {fileID: 681558783}
   - {fileID: 1806950929}
   - {fileID: 1522320510}
+  - {fileID: 1947337274}
   - {fileID: 1608750130}
   - {fileID: 757389267}
-  - {fileID: 1947337274}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4368,7 +4368,7 @@ RectTransform:
   - {fileID: 1302353235}
   - {fileID: 1464735304}
   m_Father: {fileID: 1476558493}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -5378,7 +5378,7 @@ MonoBehaviour:
     RawKeyMap: 1000000020004100420043004400450046004700480049004a004b004c004d004e004f0050005100520053005400550056005700580059005a003100320033003400350036003700380039003000bd00de00dc00c000db00bb00ba00dd00bc00be00bf00e200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000d001b000000000000000000000000000000
     NullKeyMap: 27005400
     CharMap: 20006100620063006400650066006700680069006a006b006c006d006e006f0070007100720073007400750076007700780079007a0031003200330034003500360037003800390030002d005e0040005b003b003a005d002c002e002f005c004100420043004400450046004700480049004a004b004c004d004e004f0050005100520053005400550056005700580059005a002100220023002400250026002700280029003d007e007c0060007b002b002a007d003c003e003f005f005d00
-  missLimitInput: {fileID: 1574305177}
+  MissLimitInput: {fileID: 1574305177}
   AssignedCharTMPPrefab: {fileID: 546558923873041206, guid: 473d398a666a3d346aa0868f39d5693e, type: 3}
   TotalTimeTMP: {fileID: 236894038}
   TotalMissTMP: {fileID: 887807394}
@@ -5793,7 +5793,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1476558493}
-  m_RootOrder: 8
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -6333,7 +6333,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.0000035735}
   m_SizeDelta: {x: 140, y: 65}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2090352491

@@ -37,9 +37,13 @@ public class EventBus
     public delegate void OnReturnKeyDown();
     public delegate void OnEscKeyDown();
     public delegate void OnKeyBindChanged();
+    public delegate void OnShiftKeyDown();
+    public delegate void OnShiftKeyUp();
     private event OnNormalKeyDown _onNormalKeyDown;
     private event OnReturnKeyDown _onReturnKeyDown;
     private event OnEscKeyDown _onEscKeyDown;
+    private event OnShiftKeyDown _onShiftKeyDown;
+    private event OnShiftKeyUp _onShiftKeyUp;
 #if UNITY_STANDALONE_WIN
     public delegate void OnRawKeyDown(RawKey key);
     private event OnRawKeyDown _onRawKeyDown;
@@ -66,6 +70,14 @@ public class EventBus
     {
         _onEscKeyDown += onEscKeyDown;
     }
+    public void SubscribeShiftKeyDown(OnShiftKeyDown onShiftKeyDown)
+    {
+        _onShiftKeyDown += onShiftKeyDown;
+    }
+    public void SubscribeShiftKeyUp(OnShiftKeyUp onShiftKeyUp)
+    {
+        _onShiftKeyUp += onShiftKeyUp;
+    }
     public void SubscribeKeyBindChanged(OnKeyBindChanged onKeyBindChanged)
     {
         _onKeyBindChanged += onKeyBindChanged;
@@ -90,13 +102,20 @@ public class EventBus
     {
         _onEscKeyDown -= onEscKeyDown;
     }
+    public void UnsubscribeShiftKeyDown(OnShiftKeyDown onShiftKeyDown)
+    {
+        _onShiftKeyDown -= onShiftKeyDown;
+    }
+    public void UnsubscribeShiftKeyUp(OnShiftKeyUp onShiftKeyUp)
+    {
+        _onShiftKeyUp -= onShiftKeyUp;
+    }
     public void UnsubscribeKeyBindChanged(OnKeyBindChanged onKeyBindChanged)
     {
         _onKeyBindChanged -= onKeyBindChanged;
     }
 
     // 他のクラスから、EventBus に通知を依頼するメソッド
-    // char c を渡すのは冗長（MyInputManager.CharMap があるから）だが、便利そうなので残しておく
 #if UNITY_STANDALONE_WIN
     public void NotifyRawKeyDown(RawKey key)
     {
@@ -114,6 +133,14 @@ public class EventBus
     public void NotifyEscKeyDown()
     {
         if (_onEscKeyDown != null) _onEscKeyDown();
+    }
+    public void NotifyShiftKeyDown()
+    {
+        if (_onShiftKeyDown != null) _onShiftKeyDown();
+    }
+    public void NotifyShiftKeyUp()
+    {
+        if (_onShiftKeyUp != null) _onShiftKeyUp();
     }
     public void NotifyKeyBindChanged()
     {

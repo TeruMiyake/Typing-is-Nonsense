@@ -1,0 +1,5 @@
+root = true
+
+[*.cs]
+# Unity Editor 上での文字化けを避ける
+charset = utf-8-bom

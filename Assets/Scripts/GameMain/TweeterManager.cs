@@ -39,6 +39,16 @@ public class TweeterManager : MonoBehaviour
         EventBus.Instance.UnsubscribeNormalKeyDown(OnNormalKeyDown);
     }
 
+    // ユーティリティメソッド
+    /// <summary>
+    /// long で保存してあるミリ秒を、表示用の X.XXX s に変える
+    /// </summary>
+    /// <param name="ms"></param>
+    /// <returns></returns>
+    string ToFormattedTime(long ms)
+    {
+        return (ms / 1000).ToString() + "." + (ms % 1000).ToString("000");
+    }
     public void ToggleVisible()
     {
         tweeterInputField.GetComponent<TMP_InputField>().text = "";
@@ -85,27 +95,27 @@ public class TweeterManager : MonoBehaviour
         }
         else
         {
-            long time = nowTrialData.totalTime;
-            int keys = nowTrialData.typedKeys;
+            long time = nowTrialData.TotalTime;
+            int keys = nowTrialData.TypedKeys;
             double cps = (double)(keys * 1000) / time;
-            int miss = nowTrialData.totalMiss;
+            int miss = nowTrialData.TotalMiss;
             if (gstate == "Completed")
             {
                 tweeterInputField.GetComponent<TMP_InputField>().text = $"Completed a trial ({keys} chars) on #TypingIsNonsense !" +
-                    $"\nTIME {(double)time / 1000:f3}s ({cps:f3}cps miss{miss}" +
+                    $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss}" +
                     $"{(miss > 50 ? " > 50 = Unofficial)." : "). Wow!")}" +
                     $"\nRanking: https://terum.jp/tin/";
             }
             else if (gstate == "Canceled")
             {
                 tweeterInputField.GetComponent<TMP_InputField>().text = $"GAVE UP a trial ({keys}/360 chars) on #TypingIsNonsense ..." +
-                    $"\nTIME {(double)time / 1000:f3}s ({cps:f3}cps miss{miss})." +
+                    $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss})." +
                     $"\nRanking: https://terum.jp/tin/";
             }
             else if (gstate == "Failed")
             {
-                tweeterInputField.GetComponent<TMP_InputField>().text = $"FAILED a miss <= {nowTrialData.missLimit} challenge ({keys}/360 chars) on #TypingIsNonsense . OMG!" +
-                    $"\nTIME {(double)time / 1000:f3}s ({cps:f3}cps miss{miss})." +
+                tweeterInputField.GetComponent<TMP_InputField>().text = $"FAILED a miss <= {nowTrialData.MissLimit} challenge ({keys}/360 chars) on #TypingIsNonsense . OMG!" +
+                    $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss})." +
                     $"\nRanking: https://terum.jp/tin/";
             }
         }

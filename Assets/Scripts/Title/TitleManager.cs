@@ -3,11 +3,11 @@ using UnityEngine.EventSystems;
 
 public class TitleManager : MonoBehaviour
 {
-    // ScriptableObject
+    // ScriptableObject 
     [SerializeField]
     KeyBind keyBind = null;
     KeyBindDicts dicts;
-
+    
     private void Awake()
     {
         dicts = new KeyBindDicts(keyBind);

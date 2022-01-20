@@ -15,7 +15,7 @@ public class MyInputManager : MonoBehaviour
 {
     // シフト管理。シフトキーは 2 つあるので、bool でなく int
     // メソッド内変数（入力受け取り後の確定した shifted）と区別するため、フィールドとしての shifted には _ 付与
-    private int _shifted = 0;
+    private static int _shifted = 0;
 
     // ScriptableObject
     [SerializeField]
@@ -92,6 +92,10 @@ public class MyInputManager : MonoBehaviour
     }
 #endif
 
+    public static ushort GetShiftState()
+    {
+        return (ushort)_shifted;
+    }
 
     // EventBus にイベント発生を通知するメソッド群
     /// KeyID が特殊文字 100 ~ であれば、それぞれのメソッドを呼ぶ
@@ -127,11 +131,13 @@ public class MyInputManager : MonoBehaviour
     {
         _shifted++;
         if (_shifted > 2) _shifted = 2;
+        EventBus.Instance.NotifyShiftKeyDown();
     }
     private void OnShiftKeyUp()
     {
         _shifted--;
         if (_shifted < 0) _shifted = 0;
+        EventBus.Instance.NotifyShiftKeyUp();
     }
     private void OnReturnKeyDown()
     {

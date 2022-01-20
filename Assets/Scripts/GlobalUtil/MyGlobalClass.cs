@@ -1,4 +1,5 @@
 /// ゲーム全体で使用するクラスや構造体を定義
+/// using System; は UnityEngine と重複する部分があるので行わず、毎回明示的に使う
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,46 +13,215 @@ using UnityRawInput;
 #endif
 
 
+/// <summary>
+/// トライアルデータ
+/// </summary>
 [System.Serializable]
 public class TrialData
 {
-    // ミスリミット
-    public ushort missLimit = 50;
-    // 正しく打ったキー数 = 次打つキーID。0 から始まり assignmentLength で打切
-    public int typedKeys = 0; // 本質
-    // 現在何ラップ目か 1-indexed
-    public int nowLap = 1; // 非本質（typedKeysから算出可）
-    // トータルタイム・ラップタイム・各正解打鍵タイム
+    // not saved in .log
+    public int MissLimit = 50;
+    public int[] LapMiss; // 合計ミス数方式, [0] は番兵
+    // line 1
+    public int LogVersion = 0;
+    // line 2
+    public int GameMode; // 0:Mode Nonsense
+    public int CharMode = 0; // 0:normal
+    public int Platform = 0; // 0:Win
+    // line 3
+    // 終了時刻は厳密でなくて良い。普段は MinValue にしておき、SaveLog() 時のみ計測
+    public System.DateTime DateTimeWhenFinished = System.DateTime.MinValue;
+    // line 4
+    public bool IsTerminated = true; // 0:completed, 1:terminated
+    public int TypedKeys = 0; // GameMain.OnCorrectKeyDown() で更新
+    // line 5
     // それぞれのタイム・ミスは全て「合計タイム」で入れるので、打鍵時間を出すには引き算が必要
-    // lap, key の配列の [0] は番兵
-    public long totalTime = 0; // 微妙（typedKeysとkeyTimeから算出はできる）
-    public long[] lapTime; // 非本質（keyTimeから算出可）
-    public long[] keyTime; // 本質
-    // トータルミス・ラップミス・各キー辺りミス（要るか？）
-    // それぞれのタイム・ミスは全て「合計タイム」で入れるので、打鍵時間を出すには引き算が必要
-    // lap, key の配列の [0] は番兵
-    public int totalMiss = 0; // 半本質　keyMiss を入れるなら本質ではないが、合計を出すのに時間がかかるからあった方がいい
-    public int[] lapMiss; // 非本質　上記と同様時間がかからんでもないが……
-    public int[] keyMiss; // 本質？　必要かは置いておいて、この機能をつけるならこれが本質
+    // key の配列の [0] は番兵
+    public long TotalTime = 0; // 微妙（typedKeysとCorrectKeyTimeから算出はできる）
+    public int TotalMiss = 0;
+    // line 6
+    public long[] LapTime; // 合計タイム方式, [0] は番兵
+    // line 7
+    public bool IsProtected = false;
+    // line 8
+    public ushort[] TaskCharIDs;
+    // line 9
+    // 合計タイム方式, [0] は番兵
+    // GameMain.OnCorrectKeyDown() で更新
+    public long[] CorrectKeyTime;
+    // line 10, 11
+    // ミスやシフト上下も含めた、全てのキー入力を保管する
+    // 基本は charID で入れるが、ShiftDown:97, ShiftUp:98
+    // また、IDs[0] には 初期シフト状態（0 ~ 2）を格納する。> 0 で shifted
+    // GameMain.OnNormalKeyDown(), Shift(Down|Up)Handler() で更新
+    // [0] 初期シフト状態は GameMain.StartTrial() で得る
+    public List<ushort> AllInputIDs = new List<ushort>();
+    // 合計タイム方式, [0] は番兵（初期シフト状態 = 0)
+    public List<long> AllInputTime = new List<long>();
+    // line 12 ~ 14
+    // ゲーム開始時のコンストラクタで得る
+    KeyBind TrialKeyBind = new KeyBind();
 
-    public ushort[] trialAssignment_CharID; // 本質
-    //public char[] trialAssignment_Char; // 非本質
+    // 未実装
+    //public string RegistrationCode;
 
-    public TrialData(ushort lim, int assignmentLength, int numOfLaps)
+    // コンストラクタ
+    /// <summary>
+    /// GameMode を明示しない場合、MODE:NONSENSE と解釈する
+    /// </summary>
+    public TrialData(): this(0) { }
+    /// <summary>
+    /// MissLimit を明示しない場合、MissLimit:50 とする
+    /// とりあえず生成したいだけの場合は、これで良い
+    /// </summary>
+    public TrialData(int gameMode) : this(gameMode, 50) { }
+    /// <summary>
+    /// キーバインドを指定せずに MissLimit を明示して生成することは今のところ想定していない
+    /// よって直接使うことは無さそうなので、一旦 private にしてある
+    /// </summary>
+    /// <param name="missLim"></param>
+    /// <param name="gameMode"></param>
+    private TrialData(int gameMode, int missLim)
     {
-        Debug.Log("New trialData was instantiated.");
+        int assignmentLength;
+        int numOfLaps;
+        switch (gameMode)
+        {
+            // MODE NONSENSE
+            case 0:
+                assignmentLength = 360;
+                numOfLaps = 10;
+                break;
+            default:
+                assignmentLength = 360;
+                numOfLaps = 10;
+                break;
+        }
+        // not saved in .log
+        MissLimit = missLim;
+        LapMiss = Enumerable.Repeat<int>(0, numOfLaps + 1).ToArray();
+        // saved in .log
+        GameMode = gameMode;
+        LapTime = Enumerable.Repeat<long>(0, numOfLaps + 1).ToArray();
+        TaskCharIDs = new ushort[assignmentLength];
+        CorrectKeyTime = Enumerable.Repeat<long>(0, assignmentLength + 1).ToArray();
+    }
+    /// <summary>
+    /// ゲーム開始時はこれを使う。キーバインドが既に判明しているため
+    /// </summary>
+    /// <param name="gameMode"></param>
+    /// <param name="missLim"></param>
+    /// <param name="keyBind"></param>
+    public TrialData(int gameMode, int missLim, KeyBind keyBind) : this(gameMode, missLim)
+    {
+        TrialKeyBind = keyBind;
+    }
 
-        missLimit = lim;
+    public void SaveLog()
+    {
+        // ディレクトリパスの生成
+        string saveDataDirPath = Application.dataPath + "/SaveData";
+        string logDirPath;
+        switch (GameMode)
+        {
+            // MODE:NONSENSE
+            case 0:
+                logDirPath = saveDataDirPath + "/Nonsense";
+                break;
+            default:
+                logDirPath = saveDataDirPath + "/Nonsense";
+                break;
+        }
+        switch (IsTerminated)
+        {
+            case false:
+                logDirPath += "/Completed";
+                break;
+            case true:
+                logDirPath += "/Terminated";
+                break;
+        }
+        if (!Directory.Exists(logDirPath))
+            Directory.CreateDirectory(logDirPath);
 
-        lapTime = Enumerable.Repeat<long>(0, numOfLaps + 1).ToArray();
-        keyTime = Enumerable.Repeat<long>(0, assignmentLength + 1).ToArray();
+        // ファイルパス接頭辞の生成
+        string filePath = logDirPath;
+        switch (GameMode)
+        {
+            // MODE:NONSENSE
+            case 0:
+                filePath += "/N";
+                break;
+            default:
+                logDirPath = saveDataDirPath + "/N";
+                break;
+        }
+        switch (IsTerminated)
+        {
+            case false:
+                filePath += "C";
+                break;
+            case true:
+                filePath += "T";
+                break;
+        }
 
-        lapMiss = Enumerable.Repeat<int>(0, numOfLaps + 1).ToArray();
-        keyMiss = Enumerable.Repeat<int>(0, assignmentLength + 1).ToArray();
+        // ファイルパス本体の生成
+        filePath += DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff") + ".log";
+        if (!File.Exists(filePath))
+        {
+            using (StreamWriter sw = File.CreateText(filePath))
+            {
+                sw.WriteLine(LogVersion.ToString());
+                sw.WriteLine(string.Join(",", new int[] { GameMode, CharMode, Platform }));
+                sw.WriteLine(DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff"));
+                sw.WriteLine((IsTerminated ? "1," : "0,") + TypedKeys.ToString());
+                sw.WriteLine(string.Join(",", new long[] { TotalTime, TotalMiss }));
+                sw.WriteLine(string.Join(",", LapTime));
+                sw.WriteLine(IsProtected ? "1" : "0");
+                sw.WriteLine(string.Join(",", TaskCharIDs));
+                sw.WriteLine(string.Join(",", CorrectKeyTime));
+                sw.WriteLine(string.Join(",", AllInputIDs));
+                sw.WriteLine(string.Join(",", AllInputTime));
+                sw.WriteLine(string.Join(",", TrialKeyBind.RawKeyMap));
+                sw.WriteLine(string.Join(",", TrialKeyBind.NullKeyMap));
+                sw.WriteLine(string.Join("", TrialKeyBind.CharMap));
+            }
+        }
+        else Debug.Log("A log file of the same name already exists.");
+    }
 
-        trialAssignment_CharID = new ushort[assignmentLength];
+    /// <summary>
+    /// 1-indexed の lap 値を受け取り、long のラップタイム（合計値）を返す
+    /// Assert(0 <= lap); (0) は番兵
+    /// </summary>
+    /// <param name="lap"></param>
+    /// <returns></returns>
+    public long GetLapTime(int lap)
+    {
+        Debug.Assert(0 <= lap);
+        return LapTime[lap];
+    }
+    /// <summary>
+    /// 1-indexed の lap 値を受け取り、long のラップタイム（合計値を引き算したもの）を返す
+    /// </summary>
+    /// <param name="lap"></param>
+    /// <returns></returns>
+    public long GetSingleLapTime(int lap)
+    {
+        Debug.Assert(0 <= lap);
+        // ラップ 0 は番兵
+        if (lap == 0) return 0;
+        else return LapTime[lap] - LapTime[lap - 1];
+    }
+    public void SetLapTime(int lap, long lapTime)
+    {
+        Debug.Assert(1 <= lap);
+        // ラップ 0 は番兵
+        LapTime[lap] = lapTime;
     }
 }
+
 
 /// <summary>
 /// 注）NullKeyMap はキーバインド中に更新されず、KeyBind.SaveToJson() 時に更新される
