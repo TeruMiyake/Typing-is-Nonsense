@@ -1,14 +1,15 @@
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography; // —”¶¬
+using System.Security.Cryptography; // ä¹±æ•°ç”Ÿæˆ
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-using TMPro; // ƒXƒNƒŠƒvƒg‚©‚ç TextMeshPro ‚Ì•ÏX
+using TMPro; // ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰ TextMeshPro ã®å¤‰æ›´
 
 public class GameMainManager : MonoBehaviour
 {
-    // ƒQ[ƒ€ó‘Ô•Ï”
+    // ã‚²ãƒ¼ãƒ çŠ¶æ…‹å¤‰æ•°
     enum GameState
     {
         Waiting,
@@ -25,17 +26,17 @@ public class GameMainManager : MonoBehaviour
     KeyBind keyBind;
     KeyBindDicts dicts;
 
-    // •”‰º‚Æ‚È‚éƒV[ƒ““à‚Ìƒ}ƒlƒWƒƒ[’B
+    // éƒ¨ä¸‹ã¨ãªã‚‹ã‚·ãƒ¼ãƒ³å†…ã®ãƒãƒã‚¸ãƒ£ãƒ¼é”
     TweeterManager tweeter;
 
-    // ŠÈˆÕİ’èƒIƒuƒWƒFƒNƒg
+    // ç°¡æ˜“è¨­å®šã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
     public GameObject MissLimitInput;
 
-    // ‰Û‘è•¶š•\¦—pƒvƒŒƒnƒu
+    // èª²é¡Œæ–‡å­—è¡¨ç¤ºç”¨ãƒ—ãƒ¬ãƒãƒ–
     public GameObject AssignedCharTMPPrefab;
     GameObject[] assignedCharTMPs;
 
-    // î•ñ•\¦ƒIƒuƒWƒFƒNƒg
+    // æƒ…å ±è¡¨ç¤ºã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
     public GameObject TotalTimeTMP;
     public GameObject TotalMissTMP;
     public GameObject[] LapTimeTMP;
@@ -44,39 +45,39 @@ public class GameMainManager : MonoBehaviour
     TextMeshProUGUI countDownTMPUGUI;
 
 
-    // ƒgƒ‰ƒCƒAƒ‹–ˆ‚Ìƒf[ƒ^•ÛŠÇ
+    // ãƒˆãƒ©ã‚¤ã‚¢ãƒ«æ¯ã®ãƒ‡ãƒ¼ã‚¿ä¿ç®¡
     TrialData nowTrialData;
 
-    // nowTrialData.AllInputIDs —p‚Ì’è”
+    // nowTrialData.AllInputIDs ç”¨ã®å®šæ•°
     const ushort shiftdownInputID = 97;
     const ushort shiftupInputID = 98;
 
-    // ‚±‚±‚©‚çŠî–{İ’è
+    // ã“ã“ã‹ã‚‰åŸºæœ¬è¨­å®š
 
-    // ƒAƒTƒCƒ“‚³‚ê‚½‘ÅŒ®ƒpƒ^[ƒ“‚Ìí—Ş” 26*2 + 22*2 + Space
+    // ã‚¢ã‚µã‚¤ãƒ³ã•ã‚ŒãŸæ‰“éµãƒ‘ã‚¿ãƒ¼ãƒ³ã®ç¨®é¡æ•° 26*2 + 22*2 + Space
     public const ushort NumOfKeyPatterns = 97;
-    // •¶ší”i•¶š‚ÉƒoƒCƒ“ƒh‚³‚ê‚È‚¢‘ÅŒ®ƒpƒ^[ƒ“‚ª 2 ‚Â‚ ‚é‚Ì‚Å - 2 j
+    // æ–‡å­—ç¨®æ•°ï¼ˆæ–‡å­—ã«ãƒã‚¤ãƒ³ãƒ‰ã•ã‚Œãªã„æ‰“éµãƒ‘ã‚¿ãƒ¼ãƒ³ãŒ 2 ã¤ã‚ã‚‹ã®ã§ - 2 ï¼‰
     public const ushort NumOfChars = NumOfKeyPatterns - 2;
 
-    // Configiƒ~ƒX§ŒÀ‚È‚Çj
+    // Configï¼ˆãƒŸã‚¹åˆ¶é™ãªã©ï¼‰
     Config config = new Config();
 
-    // ‰Û‘è•¶š‚Ì¶ãÀ•W
-    // ƒAƒ“ƒJ[‚Í (0, 1) ‚Â‚Ü‚è eƒIƒuƒWƒFƒNƒg Assignment ‚Ì¶ã‚©‚ç‚Ì‘Š‘Î‹——£‚Åw’è
+    // èª²é¡Œæ–‡å­—ã®å·¦ä¸Šåº§æ¨™
+    // ã‚¢ãƒ³ã‚«ãƒ¼ã¯ (0, 1) ã¤ã¾ã‚Š è¦ªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ Assignment ã®å·¦ä¸Šã‹ã‚‰ã®ç›¸å¯¾è·é›¢ã§æŒ‡å®š
     const int displayInitX = 12;
     const int displayInitY = -10;
 
-    // ‰Û‘è•¶š‚Ì Text Mesh Pro •\¦‚ğ‚¢‚­‚Â‚¸‚ÂƒYƒ‰‚·‚©
+    // èª²é¡Œæ–‡å­—ã® Text Mesh Pro è¡¨ç¤ºã‚’ã„ãã¤ãšã¤ã‚ºãƒ©ã™ã‹
     const int displayCharXdiff = 18;
     const int displayCharYdiff = -41;
 
-    // TrialData ‚É“n‚·ƒQ[ƒ€ƒ‚[ƒh•Ï”‚ÆA‚»‚ê‚ª¦‚·ˆÓ–¡
+    // TrialData ã«æ¸¡ã™ã‚²ãƒ¼ãƒ ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ã¨ã€ãã‚ŒãŒç¤ºã™æ„å‘³
     const int gameMode = 0;
     const int assignmentLength = 360;
     const int lapLength = 36;
     const int numOfLaps = 10;
 
-    // ƒXƒgƒbƒvƒEƒHƒbƒ`
+    // ã‚¹ãƒˆãƒƒãƒ—ã‚¦ã‚©ãƒƒãƒ
     System.Diagnostics.Stopwatch myStopwatch;
 
     void Awake()
@@ -85,23 +86,23 @@ public class GameMainManager : MonoBehaviour
         keyBind.LoadFromJson(0);
         dicts = new KeyBindDicts(keyBind);
 
-        // •”‰º‚ğŒ©‚Â‚¯‚é
+        // éƒ¨ä¸‹ã‚’è¦‹ã¤ã‘ã‚‹
         tweeter = GameObject.Find("Tweeter").GetComponent<TweeterManager>();
 
-        // §Œä‚·‚×‚«ƒIƒuƒWƒFƒNƒg‚È‚Ç‚Ìæ“¾‚Æ‰Šú‰»
+        // åˆ¶å¾¡ã™ã¹ãã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãªã©ã®å–å¾—ã¨åˆæœŸåŒ–
         countDownTMPUGUI = GameObject.Find("CountDownTMP").GetComponent<TextMeshProUGUI>();
         countDownTMPUGUI.text = "";
 
-        // •\¦§Œä
+        // è¡¨ç¤ºåˆ¶å¾¡
         tweeter.SetVisible(false);
 
-        // Config ‚Ì“Ç‚İ‚İ‚Æ•\¦‚Ö‚Ì”½‰f
+        // Config ã®èª­ã¿è¾¼ã¿ã¨è¡¨ç¤ºã¸ã®åæ˜ 
         config.Load();
         GameObject.Find("MissLimiterInput").GetComponent<TMP_InputField>().text = config.MissLimit.ToString();
 
         myStopwatch = new System.Diagnostics.Stopwatch();
 
-        // EventBus ‚ÉƒL[‰Ÿ‰ºƒCƒxƒ“ƒg”­¶‚Ìƒƒ\ƒbƒhÀs‚ğˆË—Š
+        // EventBus ã«ã‚­ãƒ¼æŠ¼ä¸‹ã‚¤ãƒ™ãƒ³ãƒˆç™ºç”Ÿæ™‚ã®ãƒ¡ã‚½ãƒƒãƒ‰å®Ÿè¡Œã‚’ä¾é ¼
         EventBus.Instance.SubscribeNormalKeyDown(OnNormalKeyDown);
         EventBus.Instance.SubscribeReturnKeyDown(OnGameStartButtonClick);
         EventBus.Instance.SubscribeEscKeyDown(OnBackButtonClick);
@@ -115,7 +116,7 @@ public class GameMainManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Completed, Canceled ‚Å‚à TrialInfo ‚Í•K—v‚¾‚ªA(ƒLƒƒƒ“ƒZƒ‹|Š®—¹) ‚É•`‰æ‚µ‚Ä‚¢‚é‚©‚ç‚±‚±‚Å‚Í•s—v
+        // Completed, Canceled ã§ã‚‚ TrialInfo ã¯å¿…è¦ã ãŒã€(ã‚­ãƒ£ãƒ³ã‚»ãƒ«|å®Œäº†) ã«æç”»ã—ã¦ã„ã‚‹ã‹ã‚‰ã“ã“ã§ã¯ä¸è¦
         if (gameState == GameState.Countdown)
         {
             long ms = myStopwatch.ElapsedMilliseconds;
@@ -144,7 +145,7 @@ public class GameMainManager : MonoBehaviour
         EventBus.Instance.UnsubscribeShiftKeyUp(ShiftKeyUpHandler);
     }
 
-    // •”‰º‚Æ‚Ì‚â‚èæ‚è
+    // éƒ¨ä¸‹ã¨ã®ã‚„ã‚Šå–ã‚Š
     public System.Tuple<string, TrialData> GetTrialData()
     {
         if (gameState == GameState.TrialOn || gameState == GameState.Waiting)
@@ -153,9 +154,9 @@ public class GameMainManager : MonoBehaviour
             return new System.Tuple<string, TrialData>(gameState.ToString(), nowTrialData);
     }
 
-    // ƒ†[ƒeƒBƒŠƒeƒBƒƒ\ƒbƒh
+    // ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£ãƒ¡ã‚½ãƒƒãƒ‰
     /// <summary>
-    /// long ‚Å•Û‘¶‚µ‚Ä‚ ‚éƒ~ƒŠ•b‚ğA•\¦—p‚Ì X.XXX s ‚É•Ï‚¦‚é
+    /// long ã§ä¿å­˜ã—ã¦ã‚ã‚‹ãƒŸãƒªç§’ã‚’ã€è¡¨ç¤ºç”¨ã® X.XXX s ã«å¤‰ãˆã‚‹
     /// </summary>
     /// <param name="ms"></param>
     /// <returns></returns>
@@ -164,21 +165,21 @@ public class GameMainManager : MonoBehaviour
         return (ms / 1000).ToString() + "." + (ms % 1000).ToString("000");
     }
 
-    // ó‘Ô§Œäƒƒ\ƒbƒh
+    // çŠ¶æ…‹åˆ¶å¾¡ãƒ¡ã‚½ãƒƒãƒ‰
     void StartCountdown()
     {
         gameState = GameState.Countdown;
 
-        // ƒJƒEƒ“ƒgƒ_ƒEƒ“ƒXƒ^[ƒg
+        // ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³ã‚¹ã‚¿ãƒ¼ãƒˆ
         myStopwatch.Restart();
 
-        // ŠÈˆÕİ’è’†‚Í“®‚©‚¹‚È‚¢ ¦ƒVƒtƒg—‚İ‚ÌƒoƒO‚ª‚±‚±‚É–°‚Á‚Ä‚é‚©‚à
+        // ç°¡æ˜“è¨­å®šä¸­ã¯å‹•ã‹ã›ãªã„ â€»ã‚·ãƒ•ãƒˆçµ¡ã¿ã®ãƒã‚°ãŒã“ã“ã«çœ ã£ã¦ã‚‹ã‹ã‚‚
         if (MissLimitInput.GetComponent<TMP_InputField>().isFocused) return;
 
-        // ŠÈˆÕİ’è‚ğ’â~
+        // ç°¡æ˜“è¨­å®šã‚’åœæ­¢
         MissLimitInput.GetComponent<TMP_InputField>().readOnly = true;
 
-        // ‰æ–Ê•\¦‚Ì‰Šú‰»
+        // ç”»é¢è¡¨ç¤ºã®åˆæœŸåŒ–
         TotalTimeTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
         TotalMissTMP.GetComponent<TextMeshProUGUI>().text = $"0";
         TotalCPSTMP.GetComponent<TextMeshProUGUI>().text = $"0.000";
@@ -187,54 +188,52 @@ public class GameMainManager : MonoBehaviour
         tweeter.SetVisible(false);
 
 
-        // ƒ{ƒ^ƒ“‚Ì•\¦•ÏX
+        // ãƒœã‚¿ãƒ³ã®è¡¨ç¤ºå¤‰æ›´
         GameObject.Find("StartButton").GetComponent<UnityEngine.UI.Button>().interactable = false;
         GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Cancel Trial [Esc]";
 
-        // İ’è‚ÌÄ“Ç‚İ‚İiŠÈˆÕİ’è‚ÅXV‚µ‚Ä‚¢‚éê‡‚ª‚ ‚é‚Ì‚ÅA‚±‚±‚ÅÄ“x“Ç‚İ‚Şj
+        // è¨­å®šã®å†èª­ã¿è¾¼ã¿ï¼ˆç°¡æ˜“è¨­å®šã§æ›´æ–°ã—ã¦ã„ã‚‹å ´åˆãŒã‚ã‚‹ã®ã§ã€ã“ã“ã§å†åº¦èª­ã¿è¾¼ã‚€ï¼‰
         config.Load();
 
-        // nowTrialData ‚Ì‰Šú‰»
+        // nowTrialData ã®åˆæœŸåŒ–
         nowTrialData = new TrialData(gameMode, config.MissLimit, keyBind);
 
-        // —”‚ğ¶¬‚µ‚Ä nowTrialData ‚ÉƒZƒbƒg
+        // ä¹±æ•°ã‚’ç”Ÿæˆã—ã¦ nowTrialData ã«ã‚»ãƒƒãƒˆ
         RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-        byte[] Seeds = new byte[assignmentLength];
-        rng.GetBytes(Seeds);
-
+        byte[] randomBytes = new byte[4 * assignmentLength];
+        rng.GetBytes(randomBytes);
         for (int i = 0; i < assignmentLength; i++)
         {
-            System.Random rnd = new System.Random(Seeds[i]);
-            ushort rnd_charID = (ushort)(rnd.Next(0, NumOfChars)); // 0 ~ 94
+            ushort rnd_charID = (ushort)(Math.Abs(BitConverter.ToInt32(randomBytes, i * 4)) % NumOfChars); // 0 ~ 94
 
-            // Null •¶š‚ğ‚Ü‚½‚®–ˆ‚É CharID ‚ğ ++ ‚·‚é•K—v‚ª‚ ‚é
+            // Null æ–‡å­—ã‚’ã¾ãŸãæ¯ã« CharID ã‚’ ++ ã™ã‚‹å¿…è¦ãŒã‚ã‚‹
             if (rnd_charID >= keyBind.NullKeyMap[0]) rnd_charID++;
             if (rnd_charID >= keyBind.NullKeyMap[1]) rnd_charID++;
 
             nowTrialData.TaskCharIDs[i] = rnd_charID;
         }
 
-        // RNGCryptoServiceProvider ‚Í IDisposable ƒCƒ“ƒ^[ƒtƒFƒCƒX‚ğÀ‘•‚µ‚Ä‚¢‚ÄAg—p‚ªŠ®—¹‚µ‚½‚çŒ^‚ğ”jŠü‚µ‚È‚«‚á‚¢‚¯‚È‚¢‚ç‚µ‚¢iŒö®ƒhƒLƒ…ƒƒ“ƒg‚æ‚èj
-        // IDisposable ƒCƒ“ƒ^[ƒtƒFƒCƒX‚É‚Í Dispose() ‚Æ‚¢‚¤ƒƒ\ƒbƒh‚¾‚¯‚ªÀ‘•‚³‚ê‚Ä‚¢‚é
-        // ‚±‚ê‚ğŒp³‚·‚éƒNƒ‰ƒX‚ÍAuƒŠƒ\[ƒX‚ğ•ø‚¦‚ñ‚Å‚é‚©‚çg‚¢I‚í‚Á‚½‚çiGC ‚ğ‘Ò‚½‚¸jDispose() ‚Å”jŠü‚µ‚½•û‚ª‚¢‚¢v‚Æl‚¦‚ê‚Î‚¢‚¢‚¾‚ë‚¤
+        // RNGCryptoServiceProvider ã¯ IDisposable ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã‚’å®Ÿè£…ã—ã¦ã„ã¦ã€ä½¿ç”¨ãŒå®Œäº†ã—ãŸã‚‰å‹ã‚’ç ´æ£„ã—ãªãã‚ƒã„ã‘ãªã„ã‚‰ã—ã„ï¼ˆå…¬å¼ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã‚ˆã‚Šï¼‰
+        // IDisposable ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã«ã¯ Dispose() ã¨ã„ã†ãƒ¡ã‚½ãƒƒãƒ‰ã ã‘ãŒå®Ÿè£…ã•ã‚Œã¦ã„ã‚‹
+        // ã“ã‚Œã‚’ç¶™æ‰¿ã™ã‚‹ã‚¯ãƒ©ã‚¹ã¯ã€ã€Œãƒªã‚½ãƒ¼ã‚¹ã‚’æŠ±ãˆè¾¼ã‚“ã§ã‚‹ã‹ã‚‰ä½¿ã„çµ‚ã‚ã£ãŸã‚‰ï¼ˆGC ã‚’å¾…ãŸãšï¼‰Dispose() ã§ç ´æ£„ã—ãŸæ–¹ãŒã„ã„ã€ã¨è€ƒãˆã‚Œã°ã„ã„ã ã‚ã†
         rng.Dispose();
     }
     /// <summary>
-    /// ƒgƒ‰ƒCƒAƒ‹ŠJnƒƒ\ƒbƒh
-    /// ƒJƒEƒ“ƒgƒ_ƒEƒ“I—¹‚É Update() ‚©‚çŒÄ‚Ño‚³‚ê‚é
+    /// ãƒˆãƒ©ã‚¤ã‚¢ãƒ«é–‹å§‹ãƒ¡ã‚½ãƒƒãƒ‰
+    /// ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³çµ‚äº†æ™‚ã« Update() ã‹ã‚‰å‘¼ã³å‡ºã•ã‚Œã‚‹
     /// </summary>
     void StartTrial()
     {
         gameState = GameState.TrialOn;
 
-        // TrialData.AllInputIDs[0] ‚É‰ŠúƒVƒtƒgó‘Ô‚ğŠi”[
+        // TrialData.AllInputIDs[0] ã«åˆæœŸã‚·ãƒ•ãƒˆçŠ¶æ…‹ã‚’æ ¼ç´
         nowTrialData.AllInputIDs.Add(MyInputManager.GetShiftState());
         nowTrialData.AllInputTime.Add(0);
 
-        // ‰Û‘è•¶š‚Ì•`‰æ
+        // èª²é¡Œæ–‡å­—ã®æç”»
         assignedCharTMPs = new GameObject[assignmentLength];
 
-        // Assignment ƒIƒuƒWƒFƒNƒg‚Ìq‚Æ‚µ‚Ä•`‰æ‚·‚é‚½‚ß
+        // Assignment ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å­ã¨ã—ã¦æç”»ã™ã‚‹ãŸã‚
         GameObject asg = GameObject.Find("Assignment");
         assignedCharTMPs = new GameObject[assignmentLength];
 
@@ -244,12 +243,12 @@ public class GameMainManager : MonoBehaviour
             TextMeshProUGUI assignedCharTMPUGUI = assignedCharTMPs[i].GetComponent<TextMeshProUGUI>();
             assignedCharTMPUGUI.text = dicts.ToChar_FromCharID(nowTrialData.TaskCharIDs[i]).ToString();
 
-            // •\¦êŠ‚Ìw’è
+            // è¡¨ç¤ºå ´æ‰€ã®æŒ‡å®š
             assignedCharTMPs[i].GetComponent<RectTransform>().localPosition = new Vector3(displayInitX + displayCharXdiff * (i % lapLength), displayInitY + displayCharYdiff * (i / lapLength), 0);
             //assignedCharTMPs[i].GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
         }
 
-        // ˆ—‚ªI‚í‚Á‚Ä‚©‚çƒQ[ƒ€ŠJn•ƒXƒgƒbƒvƒEƒHƒbƒ`‚ğŠJn
+        // å‡¦ç†ãŒçµ‚ã‚ã£ã¦ã‹ã‚‰ã‚²ãƒ¼ãƒ é–‹å§‹ï¼†ã‚¹ãƒˆãƒƒãƒ—ã‚¦ã‚©ãƒƒãƒã‚’é–‹å§‹
         myStopwatch.Restart();
 
         UpdateTrialInfo();
@@ -257,47 +256,47 @@ public class GameMainManager : MonoBehaviour
     void CompleteLap()
     {
         int lap = nowTrialData.TypedKeys / lapLength;
-        // nowTrialData ‚Ö‚Ìƒ‰ƒbƒvƒ^ƒCƒ€‚Ì“ü—Í
-        // •À—ñˆ—‚ÌŠÖŒW‚Å‚à‚µ‚©‚µ‚½‚ç KeyTime ‚ªƒYƒŒ‚é‚Ì‚©‚à‚µ‚ê‚È‚¢‚Ì‚ÅA‚±‚±‚Å‚Í .TotalTime ‚ğg‚Á‚Ä‚¢‚È‚¢
+        // nowTrialData ã¸ã®ãƒ©ãƒƒãƒ—ã‚¿ã‚¤ãƒ ã®å…¥åŠ›
+        // ä¸¦åˆ—å‡¦ç†ã®é–¢ä¿‚ã§ã‚‚ã—ã‹ã—ãŸã‚‰ KeyTime ãŒã‚ºãƒ¬ã‚‹ã®ã‹ã‚‚ã—ã‚Œãªã„ã®ã§ã€ã“ã“ã§ã¯ .TotalTime ã‚’ä½¿ã£ã¦ã„ãªã„
         nowTrialData.SetLapTime(lap, nowTrialData.CorrectKeyTime[nowTrialData.TypedKeys]);
-        // nowTrialData ‚Ö‚Ìƒ‰ƒbƒvƒ~ƒX‚Ì“ü—Í
+        // nowTrialData ã¸ã®ãƒ©ãƒƒãƒ—ãƒŸã‚¹ã®å…¥åŠ›
         nowTrialData.LapMiss[lap] = nowTrialData.TotalMiss;
 
-        // ÅIƒ‰ƒbƒv‚Å‚È‚¢‚Ì‚İAƒ‰ƒbƒv”Ô†‚ğXViŒ»İƒ‰ƒbƒv‚ª‹«ŠEŠO‚Éo‚Ä‚µ‚Ü‚¤‚±‚Æ‚ğ–h‚®j
-        // ‚Ü‚½AŸ‚Ìƒ‰ƒbƒv‚à‘O‚Ìƒ~ƒX”‚Æ“¯‚¶‚É‚·‚éi 0 ‚Ì‚Ü‚Ü‚¾‚Æ•\¦‚ª•ö‚ê‚éj
+        // æœ€çµ‚ãƒ©ãƒƒãƒ—ã§ãªã„æ™‚ã®ã¿ã€ãƒ©ãƒƒãƒ—ç•ªå·ã‚’æ›´æ–°ï¼ˆç¾åœ¨ãƒ©ãƒƒãƒ—ãŒå¢ƒç•Œå¤–ã«å‡ºã¦ã—ã¾ã†ã“ã¨ã‚’é˜²ãï¼‰
+        // ã¾ãŸã€æ¬¡ã®ãƒ©ãƒƒãƒ—ã‚‚å‰ã®ãƒŸã‚¹æ•°ã¨åŒã˜ã«ã™ã‚‹ï¼ˆ 0 ã®ã¾ã¾ã ã¨è¡¨ç¤ºãŒå´©ã‚Œã‚‹ï¼‰
         if (lap < numOfLaps)
             nowTrialData.LapMiss[lap+1] = nowTrialData.LapMiss[lap];
     }
     /// <summary>
-    /// ƒgƒ‰ƒCƒAƒ‹Š®—¹‚ÉŒÅ—L‚Ìˆ—‚ğs‚¤Bƒgƒ‰ƒCƒAƒ‹I—¹‚Ì‹¤’Êˆ—‚Í OnEndTrial()
+    /// ãƒˆãƒ©ã‚¤ã‚¢ãƒ«å®Œäº†æ™‚ã«å›ºæœ‰ã®å‡¦ç†ã‚’è¡Œã†ã€‚ãƒˆãƒ©ã‚¤ã‚¢ãƒ«çµ‚äº†æ™‚ã®å…±é€šå‡¦ç†ã¯ OnEndTrial()
     /// </summary>
     void CompleteTrial()
     {
-        // ƒXƒgƒbƒvƒEƒHƒbƒ`‚ğ~‚ß‚é‚ªA‚±‚±‚ÌŠÔ‚Í‚à‚Í‚âŠÖŒW–³‚¢iƒL[‘ÅŒ®‚ÉŒv‘ª‚µ‚Ä‚¢‚é‚½‚ßj
+        // ã‚¹ãƒˆãƒƒãƒ—ã‚¦ã‚©ãƒƒãƒã‚’æ­¢ã‚ã‚‹ãŒã€ã“ã“ã®æ™‚é–“ã¯ã‚‚ã¯ã‚„é–¢ä¿‚ç„¡ã„ï¼ˆã‚­ãƒ¼æ‰“éµæ™‚ã«è¨ˆæ¸¬ã—ã¦ã„ã‚‹ãŸã‚ï¼‰
         myStopwatch.Stop();
 
-        // nowTrialData ‚ÌXV
+        // nowTrialData ã®æ›´æ–°
         nowTrialData.IsTerminated = false;
 
         Debug.Assert(gameState == GameState.TrialOn);
         gameState = GameState.Completed;
 
-        // I—¹‹¤’Êˆ—‚ÌŒÄ‚Ño‚µ
+        // çµ‚äº†æ™‚å…±é€šå‡¦ç†ã®å‘¼ã³å‡ºã—
         OnEndTrial();
     }
     /// <summary>
-    /// ƒgƒ‰ƒCƒAƒ‹’†’f‚ÉŒÅ—L‚Ìˆ—‚ğs‚¤Bƒgƒ‰ƒCƒAƒ‹I—¹‚Ì‹¤’Êˆ—‚Í OnEndTrial()
-    /// ƒ~ƒX§ŒÀ‚ğ’´‚¦‚é‚Æ -TotalTime Failed, Esc -> Canceled
+    /// ãƒˆãƒ©ã‚¤ã‚¢ãƒ«ä¸­æ–­æ™‚ã«å›ºæœ‰ã®å‡¦ç†ã‚’è¡Œã†ã€‚ãƒˆãƒ©ã‚¤ã‚¢ãƒ«çµ‚äº†æ™‚ã®å…±é€šå‡¦ç†ã¯ OnEndTrial()
+    /// ãƒŸã‚¹åˆ¶é™ã‚’è¶…ãˆã‚‹ã¨ -TotalTime Failed, Esc -> Canceled
     /// </summary>
     void CancelTrial()
     {
-        // ƒXƒgƒbƒvƒEƒHƒbƒ`‚ğ~‚ß‚é‚ªA‚±‚±‚ÌŠÔ‚Í‚à‚Í‚âŠÖŒW–³‚¢iOnNormalKeyDwn() ‚ÅŒv‘ª‚µ‚Ä‚¢‚é‚½‚ßj
+        // ã‚¹ãƒˆãƒƒãƒ—ã‚¦ã‚©ãƒƒãƒã‚’æ­¢ã‚ã‚‹ãŒã€ã“ã“ã®æ™‚é–“ã¯ã‚‚ã¯ã‚„é–¢ä¿‚ç„¡ã„ï¼ˆOnNormalKeyDwn() ã§è¨ˆæ¸¬ã—ã¦ã„ã‚‹ãŸã‚ï¼‰
         myStopwatch.Stop();
 
-        // nowTrialData ‚ÌXV
+        // nowTrialData ã®æ›´æ–°
         nowTrialData.IsTerminated = true;
 
-        // TrialData ‚ÉÅIƒ‰ƒbƒvƒ^ƒCƒ€‚ğƒZƒbƒg
+        // TrialData ã«æœ€çµ‚ãƒ©ãƒƒãƒ—ã‚¿ã‚¤ãƒ ã‚’ã‚»ãƒƒãƒˆ
         int lap = nowTrialData.TypedKeys / lapLength + 1;
         nowTrialData.SetLapTime(lap, nowTrialData.TotalTime);
 
@@ -305,83 +304,83 @@ public class GameMainManager : MonoBehaviour
         if (nowTrialData.TotalMiss <= nowTrialData.MissLimit) gameState = GameState.Canceled;
         else gameState = GameState.Failed;
 
-        // I—¹‹¤’Êˆ—‚ÌŒÄ‚Ño‚µ
+        // çµ‚äº†æ™‚å…±é€šå‡¦ç†ã®å‘¼ã³å‡ºã—
         OnEndTrial();
     }
     /// <summary>
-    /// CompleteTrial() ‚Æ CancelTrial() ‚©‚çŒÄ‚Ño‚·Aƒgƒ‰ƒCƒAƒ‹I—¹‚Ì‹¤’Êˆ—
+    /// CompleteTrial() ã¨ CancelTrial() ã‹ã‚‰å‘¼ã³å‡ºã™ã€ãƒˆãƒ©ã‚¤ã‚¢ãƒ«çµ‚äº†æ™‚ã®å…±é€šå‡¦ç†
     /// </summary>
     void OnEndTrial()
     {
-        // nowTrialData ‚Ìİ’è
+        // nowTrialData ã®è¨­å®š
         nowTrialData.DateTimeWhenFinished = System.DateTime.Now;
 
-        // ƒf[ƒ^‚Ì•Û‘¶
+        // ãƒ‡ãƒ¼ã‚¿ã®ä¿å­˜
         nowTrialData.SaveLog();
 
-        // ƒgƒ‰ƒCƒAƒ‹î•ñ‚Ì•`‰æiƒgƒ‰ƒCƒAƒ‹’†‚ÆŒv‘ª‚Ìd•û‚ªˆá‚¤‚½‚ßAI—¹ˆ—Œã‚ÉŒÄ‚Ño‚µj
+        // ãƒˆãƒ©ã‚¤ã‚¢ãƒ«æƒ…å ±ã®æç”»ï¼ˆãƒˆãƒ©ã‚¤ã‚¢ãƒ«ä¸­ã¨è¨ˆæ¸¬ã®ä»•æ–¹ãŒé•ã†ãŸã‚ã€çµ‚äº†å‡¦ç†å¾Œã«å‘¼ã³å‡ºã—ï¼‰
         UpdateTrialInfo();
 
-        // ƒ{ƒ^ƒ“‚Ì•\¦•ÏX
+        // ãƒœã‚¿ãƒ³ã®è¡¨ç¤ºå¤‰æ›´
         GameObject.Find("StartButton").GetComponent<UnityEngine.UI.Button>().interactable = true;
         GameObject.Find("BackButtonTMP").GetComponent<TextMeshProUGUI>().text = "Back To Title [Esc]";
 
-        // ŠÈˆÕİ’è‚ğÄ‹N“®
+        // ç°¡æ˜“è¨­å®šã‚’å†èµ·å‹•
         MissLimitInput.GetComponent<TMP_InputField>().readOnly = false;
     }
 
-    // •\¦§Œä
+    // è¡¨ç¤ºåˆ¶å¾¡
 
-    // ƒgƒ‰ƒCƒAƒ‹ Information •`‰æƒƒ\ƒbƒh
-    // ‚±‚±‚Å‚Í nowTrialData ‚É‹L˜^Ï‚İ‚Ìƒf[ƒ^‚ğ•`‰æ‚·‚é‚¾‚¯‚È‚Ì‚ÅAXV‚ÍŠeƒCƒxƒ“ƒg‚ÉÏ‚Ü‚¹‚é•K—v‚ ‚è
+    // ãƒˆãƒ©ã‚¤ã‚¢ãƒ« Information æç”»ãƒ¡ã‚½ãƒƒãƒ‰
+    // ã“ã“ã§ã¯ nowTrialData ã«è¨˜éŒ²æ¸ˆã¿ã®ãƒ‡ãƒ¼ã‚¿ã‚’æç”»ã™ã‚‹ã ã‘ãªã®ã§ã€æ›´æ–°ã¯å„ã‚¤ãƒ™ãƒ³ãƒˆæ™‚ã«æ¸ˆã¾ã›ã‚‹å¿…è¦ã‚ã‚Š
     void UpdateTrialInfo()
     {
         Debug.Assert(gameState != GameState.Waiting);
 
         int lap = nowTrialData.TypedKeys / lapLength + 1;
-        // ƒgƒ‰ƒCƒAƒ‹Š®—¹‚Ì‚İ lap > numOfLaps ‚Æ‚È‚Á‚Ä‚µ‚Ü‚¤‚Ì‚ÅA‚»‚ê‚ğ”ğ‚¯‚é
+        // ãƒˆãƒ©ã‚¤ã‚¢ãƒ«å®Œäº†æ™‚ã®ã¿ lap > numOfLaps ã¨ãªã£ã¦ã—ã¾ã†ã®ã§ã€ãã‚Œã‚’é¿ã‘ã‚‹
         if (lap > numOfLaps) lap = numOfLaps;
 
         long totalTime;
-        // ƒQ[ƒ€’†‚Å‚ ‚Á‚½ê‡AƒŠƒAƒ‹‚ÈŒo‰ßŠÔ‚ğg‚Á‚ÄŒvZ
+        // ã‚²ãƒ¼ãƒ ä¸­ã§ã‚ã£ãŸå ´åˆã€ãƒªã‚¢ãƒ«ãªçµŒéæ™‚é–“ã‚’ä½¿ã£ã¦è¨ˆç®—
         if (gameState == GameState.TrialOn) totalTime = myStopwatch.ElapsedMilliseconds;
-        // ƒQ[ƒ€(Š®—¹|ƒLƒƒƒ“ƒZƒ‹)Œã‚Å‚ ‚Á‚½ê‡AÅŒã‚ÉƒL[‚ğ‘ÅŒ®‚µ‚½ŠÔ‚ğg‚Á‚ÄŒvZ
+        // ã‚²ãƒ¼ãƒ (å®Œäº†|ã‚­ãƒ£ãƒ³ã‚»ãƒ«)å¾Œã§ã‚ã£ãŸå ´åˆã€æœ€å¾Œã«ã‚­ãƒ¼ã‚’æ‰“éµã—ãŸæ™‚é–“ã‚’ä½¿ã£ã¦è¨ˆç®—
         else totalTime = nowTrialData.TotalTime;
         int keys = nowTrialData.TypedKeys;
         double cps = (double)(keys * 1000) / totalTime;
 
-        // ƒeƒLƒXƒgXV—p‚Ìg‚¢Ì‚ÄŠÖ”
+        // ãƒ†ã‚­ã‚¹ãƒˆæ›´æ–°ç”¨ã®ä½¿ã„æ¨ã¦é–¢æ•°
         void _UpdateText(GameObject obj, string str) => obj.GetComponent<TextMeshProUGUI>().text = str;
 
-        // ƒg[ƒ^ƒ‹ƒ^ƒCƒ€‚Ì•\¦
+        // ãƒˆãƒ¼ã‚¿ãƒ«ã‚¿ã‚¤ãƒ ã®è¡¨ç¤º
         _UpdateText(TotalTimeTMP, ToFormattedTime(totalTime));
-        // ƒg[ƒ^ƒ‹ƒ~ƒX‚Ì•\¦
+        // ãƒˆãƒ¼ã‚¿ãƒ«ãƒŸã‚¹ã®è¡¨ç¤º
         _UpdateText(TotalMissTMP, $"{nowTrialData.TotalMiss}");
-        // ƒg[ƒ^ƒ‹ CPS ‚Ì•\¦
+        // ãƒˆãƒ¼ã‚¿ãƒ« CPS ã®è¡¨ç¤º
         _UpdateText(TotalCPSTMP, $"{cps:F3}");
-        // ƒ‰ƒbƒvƒ^ƒCƒ€‚Ì•\¦
-        // 1 ~ lap-1 ‚Ü‚Å‚Í nowTrialData ‚É‘‚«‚İÏ‚İi1-indexed ’ˆÓj
+        // ãƒ©ãƒƒãƒ—ã‚¿ã‚¤ãƒ ã®è¡¨ç¤º
+        // 1 ~ lap-1 ã¾ã§ã¯ nowTrialData ã«æ›¸ãè¾¼ã¿æ¸ˆã¿ï¼ˆ1-indexed æ³¨æ„ï¼‰
         long[] singleLapTime = new long[lap + 1];
         singleLapTime[0] = 0;
         for (int i = 1; i <= lap-1; i++)
         {
             singleLapTime[i] = nowTrialData.GetSingleLapTime(i);
         }
-        // Œ»İƒ‰ƒbƒv‚Í time ‚ğg‚¤
-        // time : ƒQ[ƒ€’†‚È‚çƒŠƒAƒ‹‚È‘ÅŒ®ŠÔAterminated ‚È‚çÅIƒL[‘ÅŒ®ŠÔ‚ª“ü‚Á‚Ä‚¢‚é
+        // ç¾åœ¨ãƒ©ãƒƒãƒ—ã¯ time ã‚’ä½¿ã†
+        // time : ã‚²ãƒ¼ãƒ ä¸­ãªã‚‰ãƒªã‚¢ãƒ«ãªæ‰“éµæ™‚é–“ã€terminated ãªã‚‰æœ€çµ‚ã‚­ãƒ¼æ‰“éµæ™‚é–“ãŒå…¥ã£ã¦ã„ã‚‹
         singleLapTime[lap] = totalTime - nowTrialData.GetLapTime(lap-1);
-        // LapTimeTMP [] ‚Í 0-indexed ‚Å‚ ‚é‚±‚Æ‚É‚à’ˆÓ -> [(i|lap)-1] ‚ÅƒAƒNƒZƒX
+        // LapTimeTMP [] ã¯ 0-indexed ã§ã‚ã‚‹ã“ã¨ã«ã‚‚æ³¨æ„ -> [(i|lap)-1] ã§ã‚¢ã‚¯ã‚»ã‚¹
         for (int i = 1; i <= lap; i++)
         {
             _UpdateText(LapTimeTMP[i - 1], ToFormattedTime(singleLapTime[i]));
         }
-        // ƒ‰ƒbƒvƒ~ƒX‚Ì•\¦
+        // ãƒ©ãƒƒãƒ—ãƒŸã‚¹ã®è¡¨ç¤º
         for (int i = 1; i <= lap; i++)
         {
             int iLapMiss = nowTrialData.LapMiss[i] - nowTrialData.LapMiss[i - 1];
             _UpdateText(LapMissTMP[i - 1], iLapMiss == 0 ? "" : iLapMiss.ToString());
         }
-        // I—¹‚µ‚Ä‚¢‚È‚¢ƒ‰ƒbƒv‚Í ‹ó”’ ‚Å–„‚ß‚é
+        // çµ‚äº†ã—ã¦ã„ãªã„ãƒ©ãƒƒãƒ—ã¯ ç©ºç™½ ã§åŸ‹ã‚ã‚‹
         for (int i = lap + 1; i <= numOfLaps; i++)
         {
             _UpdateText(LapTimeTMP[i - 1], "");
@@ -390,42 +389,42 @@ public class GameMainManager : MonoBehaviour
 
     }
 
-    // ƒgƒ‰ƒCƒAƒ‹§Œä
+    // ãƒˆãƒ©ã‚¤ã‚¢ãƒ«åˆ¶å¾¡
     void OnCorrectKeyDown()
     {
         assignedCharTMPs[nowTrialData.TypedKeys].GetComponent<TextMeshProUGUI>().color = new UnityEngine.Color(0.25f, 0.15f, 0.15f, 0.1f);
 
-        // nowTrialData ‚ÌXVˆ—
-        // ‚±‚±‚Åƒg[ƒ^ƒ‹ƒ^ƒCƒ€‚Í“ü—Í‚µ‚È‚¢iOnNormalButtonClick() ‚Å“ü—Í‚µ‚Ä‚ ‚é‚½‚ßj
+        // nowTrialData ã®æ›´æ–°å‡¦ç†
+        // ã“ã“ã§ãƒˆãƒ¼ã‚¿ãƒ«ã‚¿ã‚¤ãƒ ã¯å…¥åŠ›ã—ãªã„ï¼ˆOnNormalButtonClick() ã§å…¥åŠ›ã—ã¦ã‚ã‚‹ãŸã‚ï¼‰
         nowTrialData.TypedKeys++;
         nowTrialData.CorrectKeyTime[nowTrialData.TypedKeys] = nowTrialData.TotalTime;
 
-        // ƒ‰ƒbƒvŠ®—¹
+        // ãƒ©ãƒƒãƒ—å®Œäº†
         if (nowTrialData.TypedKeys % lapLength == 0) CompleteLap();
-        // ƒgƒ‰ƒCƒAƒ‹Š®—¹
+        // ãƒˆãƒ©ã‚¤ã‚¢ãƒ«å®Œäº†
         if (nowTrialData.TypedKeys == assignmentLength) CompleteTrial();
     }
     void OnIncorrectKeyDown()
     {
-        // ‚±‚±‚Åƒg[ƒ^ƒ‹ƒ^ƒCƒ€‚Í“ü—Í‚µ‚È‚¢iOnNormalButtonClick() ‚Å“ü—Í‚µ‚Ä‚ ‚é‚½‚ßj
+        // ã“ã“ã§ãƒˆãƒ¼ã‚¿ãƒ«ã‚¿ã‚¤ãƒ ã¯å…¥åŠ›ã—ãªã„ï¼ˆOnNormalButtonClick() ã§å…¥åŠ›ã—ã¦ã‚ã‚‹ãŸã‚ï¼‰
 
-        // nowTrialData ‚Éƒg[ƒ^ƒ‹ƒ~ƒX‚Ì“ü—Í
+        // nowTrialData ã«ãƒˆãƒ¼ã‚¿ãƒ«ãƒŸã‚¹ã®å…¥åŠ›
         nowTrialData.TotalMiss++;
-        // nowTrialData ‚Éƒ‰ƒbƒvƒ~ƒX‚Ì“ü—Í
+        // nowTrialData ã«ãƒ©ãƒƒãƒ—ãƒŸã‚¹ã®å…¥åŠ›
         int lap = nowTrialData.TypedKeys / lapLength + 1;
         nowTrialData.LapMiss[lap] = nowTrialData.TotalMiss;
 
         if (nowTrialData.TotalMiss > nowTrialData.MissLimit)
         {
-            Debug.Log($"ƒ~ƒX‚ª‘½‚·‚¬‚Ü‚·BÅ‰‚©‚ç‚â‚è’¼‚µ‚Ä‚­‚¾‚³‚¢B");
+            Debug.Log($"ãƒŸã‚¹ãŒå¤šã™ãã¾ã™ã€‚æœ€åˆã‹ã‚‰ã‚„ã‚Šç›´ã—ã¦ãã ã•ã„ã€‚");
             CancelTrial();
         }
     }
 
-    // ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
-    // EventBus ‚É“n‚µ‚ÄÀs‚µ‚Ä‚à‚ç‚¤
-    // OnBackButtonClick() ‚Å‚ÍŠÔ‚ğ‘ª‚ç‚È‚¢
-    // ƒLƒƒƒ“ƒZƒ‹iEscj‚Ì TotalTime ‚Í ƒLƒƒƒ“ƒZƒ‹Šî€‚Å‚Í‚È‚­AÅŒã‚Ì³‰ğ‘ÅŒ®orƒ~ƒX‘ÅŒ®‚ğ‚Æ‚é‚½‚ßB
+    // ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
+    // EventBus ã«æ¸¡ã—ã¦å®Ÿè¡Œã—ã¦ã‚‚ã‚‰ã†
+    // OnBackButtonClick() ã§ã¯æ™‚é–“ã‚’æ¸¬ã‚‰ãªã„
+    // ã‚­ãƒ£ãƒ³ã‚»ãƒ«ï¼ˆEscï¼‰æ™‚ã® TotalTime ã¯ ã‚­ãƒ£ãƒ³ã‚»ãƒ«æ™‚åŸºæº–ã§ã¯ãªãã€æœ€å¾Œã®æ­£è§£æ‰“éµorãƒŸã‚¹æ‰“éµæ™‚ã‚’ã¨ã‚‹ãŸã‚ã€‚
     public void OnBackButtonClick()
     {
         if (gameState == GameState.TrialOn || gameState == GameState.Countdown) CancelTrial();
@@ -439,15 +438,15 @@ public class GameMainManager : MonoBehaviour
     }
     public void OnTweeterButtonClick()
     {
-        // ƒgƒ‰ƒCƒAƒ‹’†‚É‚í‚´‚í‚´ƒ}ƒEƒXG‚é‚®‚ç‚¢‚¾‚©‚çA Space ‚¶‚á‚È‚­‚Ä’¼‚Åƒ{ƒ^ƒ“‚ğƒNƒŠƒbƒN‚µ‚½ê‡‚ÍAƒgƒ‰ƒCƒAƒ‹’†‚Å‚à•\¦‚³‚¹‚Ä‚à‚¢‚¢‚©‚à
+        // ãƒˆãƒ©ã‚¤ã‚¢ãƒ«ä¸­ã«ã‚ã–ã‚ã–ãƒã‚¦ã‚¹è§¦ã‚‹ãã‚‰ã„ã ã‹ã‚‰ã€ Space ã˜ã‚ƒãªãã¦ç›´ã§ãƒœã‚¿ãƒ³ã‚’ã‚¯ãƒªãƒƒã‚¯ã—ãŸå ´åˆã¯ã€ãƒˆãƒ©ã‚¤ã‚¢ãƒ«ä¸­ã§ã‚‚è¡¨ç¤ºã•ã›ã¦ã‚‚ã„ã„ã‹ã‚‚
         // if (gameState == GameState.Completed ||  gameState == GameState.Canceled ||  gameState == GameState.Failed)
         tweeter.ToggleVisible();
     }
-    // OnNormalKeyDown() ‚ÅŠÔ‚ğŒv‘ª
-    // ƒgƒ‰ƒCƒAƒ‹’†‚Ìî•ñ•\¦‚Í Update() “à‚Åƒ^ƒCƒ}[‚ğ~‚ß‚ÄG‚É‘ª‚ê‚Î‚¢‚¢‚ªAƒ‰ƒbƒvEƒgƒ‰ƒCƒAƒ‹Š®—¹‚ÌŠÔŒv‘ªiƒL[‰Ÿ‰º‚É‚©‚©‚Á‚½ŠÔj‚Í³Šm‚É‚Æ‚é•K—v‚ª‚ ‚é‚½‚ßB
+    // OnNormalKeyDown() ã§æ™‚é–“ã‚’è¨ˆæ¸¬
+    // ãƒˆãƒ©ã‚¤ã‚¢ãƒ«ä¸­ã®æƒ…å ±è¡¨ç¤ºã¯ Update() å†…ã§ã‚¿ã‚¤ãƒãƒ¼ã‚’æ­¢ã‚ã¦é›‘ã«æ¸¬ã‚Œã°ã„ã„ãŒã€ãƒ©ãƒƒãƒ—ãƒ»ãƒˆãƒ©ã‚¤ã‚¢ãƒ«å®Œäº†æ™‚ã®æ™‚é–“è¨ˆæ¸¬ï¼ˆã‚­ãƒ¼æŠ¼ä¸‹ã«ã‹ã‹ã£ãŸæ™‚é–“ï¼‰ã¯æ­£ç¢ºã«ã¨ã‚‹å¿…è¦ãŒã‚ã‚‹ãŸã‚ã€‚
     void OnNormalKeyDown(ushort charID)
     {
-        // ƒQ[ƒ€ŠO
+        // ã‚²ãƒ¼ãƒ å¤–
         if (gameState == GameState.Completed || gameState == GameState.Canceled || gameState == GameState.Failed) {
             if (charID == 0) // default: Space
                 OnTweeterButtonClick();
@@ -456,15 +455,15 @@ public class GameMainManager : MonoBehaviour
         else if (gameState == GameState.TrialOn)
         {
             nowTrialData.TotalTime = myStopwatch.ElapsedMilliseconds;
-            // nowTrialData ‚ÌXV
+            // nowTrialData ã®æ›´æ–°
             nowTrialData.AllInputIDs.Add(charID);
             nowTrialData.AllInputTime.Add(nowTrialData.TotalTime);
-            // ³‘ÅŒ®
+            // æ­£æ‰“éµ
             if (nowTrialData.TaskCharIDs[nowTrialData.TypedKeys] == charID)
             {
                 OnCorrectKeyDown();
             }
-            // ƒQ[ƒ€’†‚ÅŒë‘ÅŒ®
+            // ã‚²ãƒ¼ãƒ ä¸­ã§èª¤æ‰“éµ
             else
             {
                 OnIncorrectKeyDown();
@@ -473,7 +472,7 @@ public class GameMainManager : MonoBehaviour
         // if (Countdown || Waiting), do nothing
     }
     /// <summary>
-    /// ƒVƒtƒgó‘Ô‚ğŒ³‚É“¾‚ç‚ê‚é•¶š‚ğ”»’è‚·‚éˆ—‚Í MyInputManager ‚ªs‚Á‚Ä‚¢‚é‚ªAGameMainManager ‚Å‚ÍƒVƒtƒg‚Ìã‰º“®‚ğ TrialData ‚É‘‚«‚Ş‚½‚ßA‚±‚Ìƒnƒ“ƒhƒ‰‚ğ—v‚·‚éB
+    /// ã‚·ãƒ•ãƒˆçŠ¶æ…‹ã‚’å…ƒã«å¾—ã‚‰ã‚Œã‚‹æ–‡å­—ã‚’åˆ¤å®šã™ã‚‹å‡¦ç†ã¯ MyInputManager ãŒè¡Œã£ã¦ã„ã‚‹ãŒã€GameMainManager ã§ã¯ã‚·ãƒ•ãƒˆã®ä¸Šä¸‹å‹•ã‚’ TrialData ã«æ›¸ãè¾¼ã‚€ãŸã‚ã€ã“ã®ãƒãƒ³ãƒ‰ãƒ©ã‚’è¦ã™ã‚‹ã€‚
     /// </summary>
     void ShiftKeyDownHandler()
     {
@@ -484,7 +483,7 @@ public class GameMainManager : MonoBehaviour
         }
     }
     /// <summary>
-    /// ƒVƒtƒgó‘Ô‚ğŒ³‚É“¾‚ç‚ê‚é•¶š‚ğ”»’è‚·‚éˆ—‚Í MyInputManager ‚ªs‚Á‚Ä‚¢‚é‚ªAGameMainManager ‚Å‚ÍƒVƒtƒg‚Ìã‰º“®‚ğ TrialData ‚É‘‚«‚Ş‚½‚ßA‚±‚Ìƒnƒ“ƒhƒ‰‚ğ—v‚·‚éB
+    /// ã‚·ãƒ•ãƒˆçŠ¶æ…‹ã‚’å…ƒã«å¾—ã‚‰ã‚Œã‚‹æ–‡å­—ã‚’åˆ¤å®šã™ã‚‹å‡¦ç†ã¯ MyInputManager ãŒè¡Œã£ã¦ã„ã‚‹ãŒã€GameMainManager ã§ã¯ã‚·ãƒ•ãƒˆã®ä¸Šä¸‹å‹•ã‚’ TrialData ã«æ›¸ãè¾¼ã‚€ãŸã‚ã€ã“ã®ãƒãƒ³ãƒ‰ãƒ©ã‚’è¦ã™ã‚‹ã€‚
     /// </summary>
     void ShiftKeyUpHandler()
     {
