@@ -86,8 +86,10 @@ public class MyInputManager : MonoBehaviour
     {
         if (keyBindDicts.dictToKeyID_FromRawKey.ContainsKey(key))
         {
+            ushort rshift = GlobalConsts.KeyID_RShift;
+            ushort lshift = GlobalConsts.KeyID_LShift;
             ushort keyID = keyBindDicts.ToKeyID_FromRawKey(key);
-            if (keyID == 0 || keyID == 1) OnShiftKeyUp();
+            if (keyID == rshift || keyID == lshift) OnShiftKeyUp();
         }
     }
 #endif
@@ -104,14 +106,19 @@ public class MyInputManager : MonoBehaviour
     ///         ※ ただし、CharID が割り振られていない 2 キーの場合は、処理を実行しない
     private void OnKeyDown(ushort keyID)
     {
-        ushort retkey = keyID;
-        if (retkey == 0 || retkey == 1) OnShiftKeyDown(); // RawKey:16
-        else if (retkey == 100) OnReturnKeyDown(); // RawKey:13
-        else if (retkey == 101) OnEscKeyDown(); // RawKey:27
+        ushort rshift = GlobalConsts.KeyID_RShift;
+        ushort lshift = GlobalConsts.KeyID_LShift;
+        ushort space = GlobalConsts.KeyID_Space;
+        ushort ret = GlobalConsts.KeyID_Return;
+        ushort esc = GlobalConsts.KeyID_Esc;
+        if (keyID == rshift || keyID == lshift) OnShiftKeyDown(); // RawKey:16
+        else if (keyID == ret) OnReturnKeyDown(); // RawKey:13
+        else if (keyID == esc) OnEscKeyDown(); // RawKey:27
         // KeyID:2 (Preset:Space) にはシフト関係無しなので、シフト処理に移行させない
-        else if (retkey == 2) OnNormalKeyDown(0); // CharID of Space: 0
+        else if (keyID == space) OnNormalKeyDown(0); // CharID of Space: 0
         else
         {
+            ushort retkey = keyID;
             bool shifted = false;
             if (_shifted > 0) shifted = true;
             if (shifted) retkey += 48;
@@ -122,21 +129,28 @@ public class MyInputManager : MonoBehaviour
         }
 
     }
-    /// CharID のアサインされていないキー押下は無視すればいいので、
     private void OnNormalKeyDown(ushort charID)
     {
         EventBus.Instance.NotifyNormalKeyDown(charID);
     }
+    /// <summary>
+    /// リファクタリングによって ShiftUp/Down も NormalKeyDown(charID) で渡されるようになったため、NotifyShiftKeyDown() は不必要となったはずだが、とりあえず当面残しておく
+    /// </summary>
     private void OnShiftKeyDown()
     {
         _shifted++;
         if (_shifted > 2) _shifted = 2;
+        EventBus.Instance.NotifyNormalKeyDown(GlobalConsts.CharID_ShiftDown); // 固定
         EventBus.Instance.NotifyShiftKeyDown();
     }
+    /// <summary>
+    /// リファクタリングによって ShiftUp/Down も NormalKeyDown(charID) で渡されるようになったため、NotifyShiftKeyUp() は不必要となったはずだが、とりあえず当面残しておく
+    /// </summary>
     private void OnShiftKeyUp()
     {
         _shifted--;
         if (_shifted < 0) _shifted = 0;
+        EventBus.Instance.NotifyNormalKeyDown(GlobalConsts.CharID_ShiftUp); // 固定
         EventBus.Instance.NotifyShiftKeyUp();
     }
     private void OnReturnKeyDown()

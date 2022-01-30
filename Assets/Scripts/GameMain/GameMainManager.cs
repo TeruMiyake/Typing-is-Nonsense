@@ -38,10 +38,6 @@ public class GameMainManager : MonoBehaviour
     // トライアル毎のデータ保管
     TrialData nowTrialData;
 
-    // nowTrialData.AllInputIDs 用の定数
-    const ushort shiftdownInputID = 97;
-    const ushort shiftupInputID = 98;
-
     // ここから基本設定
 
     // アサインされた打鍵パターンの種類数 26*2 + 22*2 + Space
@@ -99,8 +95,9 @@ public class GameMainManager : MonoBehaviour
         EventBus.Instance.SubscribeNormalKeyDown(OnNormalKeyDown);
         EventBus.Instance.SubscribeReturnKeyDown(OnGameStartButtonClick);
         EventBus.Instance.SubscribeEscKeyDown(OnBackButtonClick);
-        EventBus.Instance.SubscribeShiftKeyDown(ShiftKeyDownHandler);
-        EventBus.Instance.SubscribeShiftKeyUp(ShiftKeyUpHandler);
+        // リファクタリングで必要なくなったはず
+        //EventBus.Instance.SubscribeShiftKeyDown(ShiftKeyDownHandler);
+        //EventBus.Instance.SubscribeShiftKeyUp(ShiftKeyUpHandler);
     }
     // Start is called before the first frame update
     void Start()
@@ -134,8 +131,9 @@ public class GameMainManager : MonoBehaviour
         EventBus.Instance.UnsubscribeNormalKeyDown(OnNormalKeyDown);
         EventBus.Instance.UnsubscribeReturnKeyDown(OnGameStartButtonClick);
         EventBus.Instance.UnsubscribeEscKeyDown(OnBackButtonClick);
-        EventBus.Instance.UnsubscribeShiftKeyDown(ShiftKeyDownHandler);
-        EventBus.Instance.UnsubscribeShiftKeyUp(ShiftKeyUpHandler);
+        // リファクタリングで必要なくなったはず
+        //EventBus.Instance.UnsubscribeShiftKeyDown(ShiftKeyDownHandler);
+        //EventBus.Instance.UnsubscribeShiftKeyUp(ShiftKeyUpHandler);
     }
 
     // 部下とのやり取り
@@ -450,11 +448,16 @@ public class GameMainManager : MonoBehaviour
             else return;
         }
         else if (gameState == GameState.TrialOn)
-        {
-            nowTrialData.TotalTime = myStopwatch.ElapsedMilliseconds;
+        {nowTrialData.TotalTime = myStopwatch.ElapsedMilliseconds;
             // nowTrialData の更新
             nowTrialData.AllInputIDs.Add(charID);
             nowTrialData.AllInputTime.Add(nowTrialData.TotalTime);
+
+            // 正打鍵か誤打鍵の判定をする（ただし、シフト上下動はどちらでもない）
+            ushort shiftdown = GlobalConsts.CharID_ShiftDown;
+            ushort shiftup = GlobalConsts.CharID_ShiftUp;
+            bool isShiftToggling = (charID == shiftdown || charID == shiftup);
+            if (isShiftToggling) return;
             // 正打鍵
             if (nowTrialData.TaskCharIDs[nowTrialData.TypedKeys] == charID)
             {
@@ -468,27 +471,28 @@ public class GameMainManager : MonoBehaviour
         }
         // if (Countdown || Waiting), do nothing
     }
-    /// <summary>
-    /// シフト状態を元に得られる文字を判定する処理は MyInputManager が行っているが、GameMainManager ではシフトの上下動を TrialData に書き込むため、このハンドラを要する。
-    /// </summary>
-    void ShiftKeyDownHandler()
-    {
-        if (gameState == GameState.TrialOn)
-        {
-            nowTrialData.AllInputIDs.Add(shiftdownInputID);
-            nowTrialData.AllInputTime.Add(myStopwatch.ElapsedMilliseconds);
-        }
-    }
-    /// <summary>
-    /// シフト状態を元に得られる文字を判定する処理は MyInputManager が行っているが、GameMainManager ではシフトの上下動を TrialData に書き込むため、このハンドラを要する。
-    /// </summary>
-    void ShiftKeyUpHandler()
-    {
-        if (gameState == GameState.TrialOn)
-        {
-            nowTrialData.AllInputIDs.Add(shiftupInputID);
-            nowTrialData.AllInputTime.Add(myStopwatch.ElapsedMilliseconds);
-        }
-    }
+    // リファクタリングで必要なくなったが、ちゃんと動くまでとっておく
+    ///// <summary>
+    ///// シフト状態を元に得られる文字を判定する処理は MyInputManager が行っているが、GameMainManager ではシフトの上下動を TrialData に書き込むため、このハンドラを要する。
+    ///// </summary>
+    //void ShiftKeyDownHandler()
+    //{
+    //    if (gameState == GameState.TrialOn)
+    //    {
+    //        nowTrialData.AllInputIDs.Add(shiftdownInputID);
+    //        nowTrialData.AllInputTime.Add(myStopwatch.ElapsedMilliseconds);
+    //    }
+    //}
+    ///// <summary>
+    ///// シフト状態を元に得られる文字を判定する処理は MyInputManager が行っているが、GameMainManager ではシフトの上下動を TrialData に書き込むため、このハンドラを要する。
+    ///// </summary>
+    //void ShiftKeyUpHandler()
+    //{
+    //    if (gameState == GameState.TrialOn)
+    //    {
+    //        nowTrialData.AllInputIDs.Add(shiftupInputID);
+    //        nowTrialData.AllInputTime.Add(myStopwatch.ElapsedMilliseconds);
+    //    }
+    //}
 
 }

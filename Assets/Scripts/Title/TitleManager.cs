@@ -61,7 +61,6 @@ public class TitleManager : MonoBehaviour
     [System.Obsolete("バインド機能つけたら、文字の判別方法を変更要")]
     public void OnNormalKeyDown(ushort charID)
     {
-        Debug.Log("normalkeydown");
         if (charID == 14) OnGameMainStartButtonClick(); // T
         if (charID == 5) OnKeybindingStartButtonClick(); // E
         if (charID == 10) OnJumpToWebsiteButtonClick(); // J

@@ -237,14 +237,14 @@ public class TrialData
 
 
 /// <summary>
-/// 注）NullKeyMap はキーバインド中に更新されず、KeyBind.SaveToJson() 時に更新される
+/// 注）NullKeyMap は Keybinding 中には更新されず、KeyBind.SaveToJson() 時に更新される
 /// </summary>
 [System.Serializable]
 public class KeyBind
 {
     public ushort[] RawKeyMap; // 0 ~ 50
     public ushort[] NullKeyMap; // 0 ~ 2
-    public char[] CharMap; // 0 ~ 96
+    public char[] CharMap; // 0 ~ 96. 97:SDown, 98:SUp は固定のため
 
     public KeyBind()
     {
@@ -488,8 +488,8 @@ public class KeyBindDicts
             }
         }
         // 特殊キーの処理（そのうちバインドを Config などから流し込む機能をつける）
-        dictToKeyID_FromRawKey[RawKey.Return] = 100; // 13
-        dictToKeyID_FromRawKey[RawKey.Escape] = 101; // 27
+        dictToKeyID_FromRawKey[RawKey.Return] = GlobalConsts.KeyID_Return; // 13
+        dictToKeyID_FromRawKey[RawKey.Escape] = GlobalConsts.KeyID_Esc; // 27
     }
 
     // メソッド
