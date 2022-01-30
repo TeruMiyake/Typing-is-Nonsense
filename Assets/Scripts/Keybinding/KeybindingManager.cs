@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -11,41 +11,41 @@ using UnityRawInput;
 
 public class KeybindingManager : MonoBehaviour
 {
-    // ƒvƒŒƒnƒuİ’èA‹y‚ÑƒvƒŒƒnƒuŠi”[”z—ñ
+    // ãƒ—ãƒ¬ãƒãƒ–è¨­å®šã€åŠã³ãƒ—ãƒ¬ãƒãƒ–æ ¼ç´é…åˆ—
     public GameObject KeyBinderPrefab; 
     GameObject[] keyBinder = new GameObject[104];
 
     public GameObject CharBinderPrefab;
     GameObject[] charBinder = new GameObject[97];
 
-    // ÀÛ‚É‚±‚ÌƒV[ƒ“‚Å“ü—Í‚ğ“¾‚é‚½‚ß‚ÌƒL[ƒoƒCƒ“ƒhƒf[ƒ^
+    // å®Ÿéš›ã«ã“ã®ã‚·ãƒ¼ãƒ³ã§å…¥åŠ›ã‚’å¾—ã‚‹ãŸã‚ã®ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ãƒ‡ãƒ¼ã‚¿
     [SerializeField]
     KeyBind keyBind;
     KeyBindDicts dicts;
 
-    // İ’è’†‚ÌƒL[ƒoƒCƒ“ƒhƒf[ƒ^
+    // è¨­å®šä¸­ã®ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ãƒ‡ãƒ¼ã‚¿
     [SerializeField]
     KeyBind nowBindingKeyBind;
 
-    // ó‘Ô•Ï”
-    // ƒL[“ü—Í‚Ìó•t‘Ò‚¿ó‘Ô
+    // çŠ¶æ…‹å¤‰æ•°
+    // ã‚­ãƒ¼å…¥åŠ›ã®å—ä»˜å¾…ã¡çŠ¶æ…‹
     // -1 : notListening, 0 ~ 50 : Listening KeyID 0~50 
     int nowListening = -1;
 
     private void Awake()
     {
-        // ‘€ì—pƒL[ƒoƒCƒ“ƒh‚Ì“Ç‚İ‚İ
+        // æ“ä½œç”¨ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ã®èª­ã¿è¾¼ã¿
         keyBind = new KeyBind();
         keyBind.LoadFromJson(0);
         dicts = new KeyBindDicts(keyBind);
 
-        // İ’è—pƒL[ƒoƒCƒ“ƒh‚Ì¶¬
+        // è¨­å®šç”¨ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ã®ç”Ÿæˆ
         nowBindingKeyBind = keyBind;
 
-        // ƒGƒ‰[ƒƒbƒZ[ƒW‚Ì‰Šú‰»
+        // ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®åˆæœŸåŒ–
         GameObject.Find("ErrorTMP").GetComponent<TextMeshProUGUI>().text = "";
 
-        // ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰‚Ì“o˜^iˆø”‚Â‚«‚ÍƒCƒ“ƒXƒyƒNƒ^‚©‚ç“o˜^‚Å‚«‚È‚¢‚½‚ßj
+        // ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ã®ç™»éŒ²ï¼ˆå¼•æ•°ã¤ãã¯ã‚¤ãƒ³ã‚¹ãƒšã‚¯ã‚¿ã‹ã‚‰ç™»éŒ²ã§ããªã„ãŸã‚ï¼‰
         GameObject.Find("UseThisButton").GetComponent<Button>().onClick.AddListener(
             () =>
             {
@@ -53,7 +53,7 @@ public class KeybindingManager : MonoBehaviour
                 {
                     nowBindingKeyBind.SaveToJson(0);
                     keyBind = nowBindingKeyBind;
-                    // MyKeyBind0.json ‚Ì•ÏX‚ğ EventBus ‚É’Ê’m -> MyInputManager ‚ªŒŸ’m
+                    // MyKeyBind0.json ã®å¤‰æ›´ã‚’ EventBus ã«é€šçŸ¥ -> MyInputManager ãŒæ¤œçŸ¥
                     EventBus.Instance.NotifyKeyBindChanged();
                 }
             });
@@ -74,20 +74,20 @@ public class KeybindingManager : MonoBehaviour
         for (int i = 49; i < 97; i++)
         {
             InstantiateCharBinder(i, 380, -122 - (i-49) * 40);
-            // InputField.colors.normalColor ‚É’¼Ú Color ‚ğ‘ã“ü‚Å‚«‚È‚¢‚½‚ßA‚Ü‚¸ ColorBlock ‚ğ‚Ü‚é‚²‚Æì‚Á‚Ä“n‚·
+            // InputField.colors.normalColor ã«ç›´æ¥ Color ã‚’ä»£å…¥ã§ããªã„ãŸã‚ã€ã¾ãš ColorBlock ã‚’ã¾ã‚‹ã”ã¨ä½œã£ã¦æ¸¡ã™
             ColorBlock cb = charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().colors;
             cb.normalColor = new Color(0.85f, 0.7f, 0.5f, 1f);
             charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().colors = cb;
         }
 
-        // EventBus ‚É“o˜^
+        // EventBus ã«ç™»éŒ²
         EventBus.Instance.SubscribeRawKeyDown(RawKeyDownEventHandler);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        // •`‰æ‚ÌXV
+        // æç”»ã®æ›´æ–°
         UpdateDisplay();
     }
 
@@ -97,7 +97,7 @@ public class KeybindingManager : MonoBehaviour
     }
     void OnDestroy()
     {
-        // EventBus ‚©‚ç’E‘Ş
+        // EventBus ã‹ã‚‰è„±é€€
         EventBus.Instance.UnsubscribeRawKeyDown(RawKeyDownEventHandler);
     }
 
@@ -117,15 +117,15 @@ public class KeybindingManager : MonoBehaviour
 
     }
 
-    // ƒvƒŒƒnƒu¶¬
+    // ãƒ—ãƒ¬ãƒãƒ–ç”Ÿæˆ
     void InstantiateKeyBinder(int id, int x, int y)
     {
         keyBinder[id] = Instantiate(KeyBinderPrefab, GameObject.Find("Content").GetComponent<RectTransform>());
         keyBinder[id].GetComponent<RectTransform>().localPosition = new Vector3(x, y, 0);
         keyBinder[id].GetComponent<RectTransform>().Find("KeyIDText").GetComponent<Text>().text = $"{id:#000}";
 
-        // ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰‚Ìİ’è
-        // ‚±‚±‚Å id ‚ğ‚»‚Ì‚Ü‚Üˆø”‚É“n‚·‚ÆAƒXƒR[ƒv‚ÌŠÖŒW‚ÅƒoƒO‚é
+        // ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©ã®è¨­å®š
+        // ã“ã“ã§ id ã‚’ãã®ã¾ã¾å¼•æ•°ã«æ¸¡ã™ã¨ã€ã‚¹ã‚³ãƒ¼ãƒ—ã®é–¢ä¿‚ã§ãƒã‚°ã‚‹
         ushort buttonNum = (ushort)id;
         keyBinder[id].GetComponent<RectTransform>().Find("KeyBindButton").GetComponent<Button>().onClick.AddListener(() => OnKeyBindButtonClick(buttonNum));
     }
@@ -135,12 +135,12 @@ public class KeybindingManager : MonoBehaviour
         charBinder[id].GetComponent<RectTransform>().localPosition = new Vector3(x, y, 0);
         charBinder[id].GetComponent<RectTransform>().Find("CharIDText").GetComponent<Text>().text = $"{id:#00}";
 
-        // ‚±‚±‚Å id ‚ğ‚»‚Ì‚Ü‚Üˆø”‚É“n‚·‚ÆAƒXƒR[ƒv‚ÌŠÖŒW‚ÅƒoƒO‚é
+        // ã“ã“ã§ id ã‚’ãã®ã¾ã¾å¼•æ•°ã«æ¸¡ã™ã¨ã€ã‚¹ã‚³ãƒ¼ãƒ—ã®é–¢ä¿‚ã§ãƒã‚°ã‚‹
         ushort buttonNum = (ushort)id;
         charBinder[id].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().onEndEdit.AddListener((str) => OnCharEdited(buttonNum, str));
     }
 
-    // ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+    // ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
     public void OnKeyBindButtonClick(ushort keyID)
     {
         Debug.Log("keyBinder clicked. keyID: " + keyID);
@@ -194,7 +194,7 @@ public class KeybindingManager : MonoBehaviour
     }
 
 
-    // •`‰æ§Œä
+    // æç”»åˆ¶å¾¡
     void UpdateDisplay()
     {
         // KeyID : 000 ~ 050

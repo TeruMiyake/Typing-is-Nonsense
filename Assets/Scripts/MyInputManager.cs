@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,26 +8,26 @@ using UnityRawInput;
 #endif
 
 /// <summary>
-///  ƒvƒ‰ƒbƒgƒtƒH[ƒ€ˆË‘¶‚ÌƒL[ƒ{[ƒh“ü—Íó‚¯æ‚è‚ğs‚¢AEventBus ‚É’Ê’m‚ğ”­s‚·‚é
-///  ‚»‚ÌŒãA‘¼‚ÌƒNƒ‰ƒX‚©‚çA’Ê’m‚ª‚³‚ê‚½Û‚ÉÀs‚µ‚Ä‚Ù‚µ‚¢ƒƒ\ƒbƒh‚ğ EventBus ‚ÉƒfƒŠƒQ[ƒg‚Æ‚µ‚Ä“o˜^‚·‚é
+///  ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ä¾å­˜ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰å…¥åŠ›å—ã‘å–ã‚Šã‚’è¡Œã„ã€EventBus ã«é€šçŸ¥ã‚’ç™ºè¡Œã™ã‚‹
+///  ãã®å¾Œã€ä»–ã®ã‚¯ãƒ©ã‚¹ã‹ã‚‰ã€é€šçŸ¥ãŒã•ã‚ŒãŸéš›ã«å®Ÿè¡Œã—ã¦ã»ã—ã„ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ EventBus ã«ãƒ‡ãƒªã‚²ãƒ¼ãƒˆã¨ã—ã¦ç™»éŒ²ã™ã‚‹
 /// </summary>
 public class MyInputManager : MonoBehaviour
 {
-    // ƒVƒtƒgŠÇ—BƒVƒtƒgƒL[‚Í 2 ‚Â‚ ‚é‚Ì‚ÅAbool ‚Å‚È‚­ int
-    // ƒƒ\ƒbƒh“à•Ï”i“ü—Íó‚¯æ‚èŒã‚ÌŠm’è‚µ‚½ shiftedj‚Æ‹æ•Ê‚·‚é‚½‚ßAƒtƒB[ƒ‹ƒh‚Æ‚µ‚Ä‚Ì shifted ‚É‚Í _ •t—^
+    // ã‚·ãƒ•ãƒˆç®¡ç†ã€‚ã‚·ãƒ•ãƒˆã‚­ãƒ¼ã¯ 2 ã¤ã‚ã‚‹ã®ã§ã€bool ã§ãªã int
+    // ãƒ¡ã‚½ãƒƒãƒ‰å†…å¤‰æ•°ï¼ˆå…¥åŠ›å—ã‘å–ã‚Šå¾Œã®ç¢ºå®šã—ãŸ shiftedï¼‰ã¨åŒºåˆ¥ã™ã‚‹ãŸã‚ã€ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¨ã—ã¦ã® shifted ã«ã¯ _ ä»˜ä¸
     private static int _shifted = 0;
 
     // ScriptableObject
     [SerializeField]
     KeyBind keyBind;
-    KeyBindDicts dicts;
+    KeyBindDicts keyBindDicts;
 
 
     void Awake()
     {
         keyBind = new KeyBind();
         keyBind.LoadFromJson(0);
-        dicts = new KeyBindDicts(keyBind);
+        keyBindDicts = new KeyBindDicts(keyBind);
 
 #if UNITY_STANDALONE_WIN
         Debug.Log("standalone win");
@@ -61,14 +61,14 @@ public class MyInputManager : MonoBehaviour
         RawKeyInput.OnKeyDown -= KeyDownHandlerForWin;
         RawKeyInput.OnKeyUp -= KeyUpHandlerForWin;
 
-        RawKeyInput.Stop(); // “ü‚ê‚È‚¢‚Æ Unity Editor ‚ª—‚¿‚é
+        RawKeyInput.Stop(); // å…¥ã‚Œãªã„ã¨ Unity Editor ãŒè½ã¡ã‚‹
 #endif
 
         EventBus.Instance.UnsubscribeKeyBindChanged(KeyBindChangedHandler);
     }
 
-    // ƒvƒ‰ƒbƒgƒtƒH[ƒ€ˆË‘¶‚ÌƒL[“ü—ÍƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
-    // ƒvƒ‰ƒbƒgƒtƒH[ƒ€ˆË‘¶‚ÌƒL[ƒR[ƒh‚ğAƒ†[ƒUŒÅ—L‚Ì KeyID ‚É•ÏŠ·‚µ‚Äƒvƒ‰ƒbƒgƒtƒH[ƒ€”ñˆË‘¶ˆ—‚ğŒÄ‚Ô
+    // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ä¾å­˜ã®ã‚­ãƒ¼å…¥åŠ›ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
+    // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ä¾å­˜ã®ã‚­ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’ã€ãƒ¦ãƒ¼ã‚¶å›ºæœ‰ã® KeyID ã«å¤‰æ›ã—ã¦ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ éä¾å­˜å‡¦ç†ã‚’å‘¼ã¶
 #if UNITY_STANDALONE_WIN
     private void RawKeyDownHandlerForWin(RawKey key)
     {
@@ -76,17 +76,17 @@ public class MyInputManager : MonoBehaviour
     }
     private void KeyDownHandlerForWin(RawKey key)
     {
-        if (!dicts.dictToKeyID_FromRawKey.ContainsKey(key)) {
+        if (!keyBindDicts.dictToKeyID_FromRawKey.ContainsKey(key)) {
             Debug.Log($"No KeyID for RawKey : {key.ToString()}");
             return;
         }
-        else OnKeyDown(dicts.ToKeyID_FromRawKey(key));
+        else OnKeyDown(keyBindDicts.ToKeyID_FromRawKey(key));
     }
     private void KeyUpHandlerForWin(RawKey key)
     {
-        if (dicts.dictToKeyID_FromRawKey.ContainsKey(key))
+        if (keyBindDicts.dictToKeyID_FromRawKey.ContainsKey(key))
         {
-            ushort keyID = dicts.ToKeyID_FromRawKey(key);
+            ushort keyID = keyBindDicts.ToKeyID_FromRawKey(key);
             if (keyID == 0 || keyID == 1) OnShiftKeyUp();
         }
     }
@@ -97,18 +97,18 @@ public class MyInputManager : MonoBehaviour
         return (ushort)_shifted;
     }
 
-    // EventBus ‚ÉƒCƒxƒ“ƒg”­¶‚ğ’Ê’m‚·‚éƒƒ\ƒbƒhŒQ
-    /// KeyID ‚ª“Áê•¶š 100 ~ ‚Å‚ ‚ê‚ÎA‚»‚ê‚¼‚ê‚Ìƒƒ\ƒbƒh‚ğŒÄ‚Ô
-    ///         ƒVƒtƒg 0 | 1 ‚Å‚ ‚ê‚ÎAOnShiftKeyDown() ‚ğÀs
-    ///         ’Êí•¶š 2 ~ 50 ‚Å‚ ‚ê‚ÎAƒVƒtƒg”»•ÊŒã OnNormalKeyDown() ‚ğÀs
-    ///         ¦ ‚½‚¾‚µACharID ‚ªŠ„‚èU‚ç‚ê‚Ä‚¢‚È‚¢ 2 ƒL[‚Ìê‡‚ÍAˆ—‚ğÀs‚µ‚È‚¢
+    // EventBus ã«ã‚¤ãƒ™ãƒ³ãƒˆç™ºç”Ÿã‚’é€šçŸ¥ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ç¾¤
+    /// KeyID ãŒç‰¹æ®Šæ–‡å­— 100 ~ ã§ã‚ã‚Œã°ã€ãã‚Œãã‚Œã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’å‘¼ã¶
+    ///         ã‚·ãƒ•ãƒˆ 0 | 1 ã§ã‚ã‚Œã°ã€OnShiftKeyDown() ã‚’å®Ÿè¡Œ
+    ///         é€šå¸¸æ–‡å­— 2 ~ 50 ã§ã‚ã‚Œã°ã€ã‚·ãƒ•ãƒˆåˆ¤åˆ¥å¾Œ OnNormalKeyDown() ã‚’å®Ÿè¡Œ
+    ///         â€» ãŸã ã—ã€CharID ãŒå‰²ã‚ŠæŒ¯ã‚‰ã‚Œã¦ã„ãªã„ 2 ã‚­ãƒ¼ã®å ´åˆã¯ã€å‡¦ç†ã‚’å®Ÿè¡Œã—ãªã„
     private void OnKeyDown(ushort keyID)
     {
         ushort retkey = keyID;
         if (retkey == 0 || retkey == 1) OnShiftKeyDown(); // RawKey:16
         else if (retkey == 100) OnReturnKeyDown(); // RawKey:13
         else if (retkey == 101) OnEscKeyDown(); // RawKey:27
-        // KeyID:2 (Preset:Space) ‚É‚ÍƒVƒtƒgŠÖŒW–³‚µ‚È‚Ì‚ÅAƒVƒtƒgˆ—‚ÉˆÚs‚³‚¹‚È‚¢
+        // KeyID:2 (Preset:Space) ã«ã¯ã‚·ãƒ•ãƒˆé–¢ä¿‚ç„¡ã—ãªã®ã§ã€ã‚·ãƒ•ãƒˆå‡¦ç†ã«ç§»è¡Œã•ã›ãªã„
         else if (retkey == 2) OnNormalKeyDown(0); // CharID of Space: 0
         else
         {
@@ -116,13 +116,13 @@ public class MyInputManager : MonoBehaviour
             if (_shifted > 0) shifted = true;
             if (shifted) retkey += 48;
 
-            if (!dicts.dictToCharID_FromKeyID.ContainsKey(retkey))
-                Debug.Log($"KeyID {retkey} ‚É CharID ‚ªƒAƒTƒCƒ“‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
-            else OnNormalKeyDown(dicts.ToCharID_FromKeyID(retkey));
+            if (!keyBindDicts.dictToCharID_FromKeyID.ContainsKey(retkey))
+                Debug.Log($"KeyID {retkey} ã« CharID ãŒã‚¢ã‚µã‚¤ãƒ³ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
+            else OnNormalKeyDown(keyBindDicts.ToCharID_FromKeyID(retkey));
         }
 
     }
-    /// CharID ‚ÌƒAƒTƒCƒ“‚³‚ê‚Ä‚¢‚È‚¢ƒL[‰Ÿ‰º‚Í–³‹‚·‚ê‚Î‚¢‚¢‚Ì‚ÅA
+    /// CharID ã®ã‚¢ã‚µã‚¤ãƒ³ã•ã‚Œã¦ã„ãªã„ã‚­ãƒ¼æŠ¼ä¸‹ã¯ç„¡è¦–ã™ã‚Œã°ã„ã„ã®ã§ã€
     private void OnNormalKeyDown(ushort charID)
     {
         EventBus.Instance.NotifyNormalKeyDown(charID);
@@ -148,11 +148,11 @@ public class MyInputManager : MonoBehaviour
         EventBus.Instance.NotifyEscKeyDown();
     }
 
-    // ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+    // ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
     private void KeyBindChangedHandler()
     {
         keyBind.LoadFromJson(0);
-        dicts = new KeyBindDicts(keyBind);
+        keyBindDicts = new KeyBindDicts(keyBind);
     }
 
 

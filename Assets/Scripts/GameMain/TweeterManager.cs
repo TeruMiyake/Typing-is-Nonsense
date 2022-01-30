@@ -1,17 +1,17 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using TMPro; // ƒXƒNƒŠƒvƒg‚©‚ç TextMeshPro ‚Ì•ÏX
+using TMPro; // ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰ TextMeshPro ã®å¤‰æ›´
 
 public class TweeterManager : MonoBehaviour
 {
     public GameObject gameMainManager;
 
-    // ó‘Ô•Ï”
+    // çŠ¶æ…‹å¤‰æ•°
     bool isTweeting = true;
 
-    // Tweeter •\¦ƒIƒuƒWƒFƒNƒg
+    // Tweeter è¡¨ç¤ºã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
     public GameObject tweeter;
     public GameObject tweeterButtonTMP;
     public GameObject tweeterInputField;
@@ -20,7 +20,7 @@ public class TweeterManager : MonoBehaviour
     // Start is called before the first frame update
     private void Awake()
     {
-        // EventBus ‚ÉƒL[‰Ÿ‰ºƒCƒxƒ“ƒg”­¶‚Ìƒƒ\ƒbƒhÀs‚ğˆË—Š *Unsubscribe –Y‚ê‚¸I
+        // EventBus ã«ã‚­ãƒ¼æŠ¼ä¸‹ã‚¤ãƒ™ãƒ³ãƒˆç™ºç”Ÿæ™‚ã®ãƒ¡ã‚½ãƒƒãƒ‰å®Ÿè¡Œã‚’ä¾é ¼ *Unsubscribe å¿˜ã‚Œãšï¼
         EventBus.Instance.SubscribeNormalKeyDown(OnNormalKeyDown);
     }
     void Start()
@@ -39,9 +39,9 @@ public class TweeterManager : MonoBehaviour
         EventBus.Instance.UnsubscribeNormalKeyDown(OnNormalKeyDown);
     }
 
-    // ƒ†[ƒeƒBƒŠƒeƒBƒƒ\ƒbƒh
+    // ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£ãƒ¡ã‚½ãƒƒãƒ‰
     /// <summary>
-    /// long ‚Å•Û‘¶‚µ‚Ä‚ ‚éƒ~ƒŠ•b‚ğA•\¦—p‚Ì X.XXX s ‚É•Ï‚¦‚é
+    /// long ã§ä¿å­˜ã—ã¦ã‚ã‚‹ãƒŸãƒªç§’ã‚’ã€è¡¨ç¤ºç”¨ã® X.XXX s ã«å¤‰ãˆã‚‹
     /// </summary>
     /// <param name="ms"></param>
     /// <returns></returns>
@@ -51,7 +51,7 @@ public class TweeterManager : MonoBehaviour
     }
     public void ToggleVisible()
     {
-        tweeterInputField.GetComponent<TMP_InputField>().text = "";
+        SetTweet("");
         copyButtonTMP.GetComponent<TextMeshProUGUI>().text = "Copy to\nClipboard [C]";
         if (isTweeting)
         {
@@ -91,7 +91,8 @@ public class TweeterManager : MonoBehaviour
         TrialData nowTrialData = tup.Item2;
         if (nowTrialData == null)
         {
-            tweeterInputField.GetComponent<TMP_InputField>().text = "There's no record to tweet about.";
+            string tweet = "There's no record to tweet about.";
+            SetTweet(tweet);
         }
         else
         {
@@ -101,24 +102,34 @@ public class TweeterManager : MonoBehaviour
             int miss = nowTrialData.TotalMiss;
             if (gstate == "Completed")
             {
-                tweeterInputField.GetComponent<TMP_InputField>().text = $"Completed a trial ({keys} chars) on #TypingIsNonsense !" +
+                string tweet = 
+                    $"Completed a trial ({keys} chars) on #TypingIsNonsense !" +
                     $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss}" +
                     $"{(miss > 50 ? " > 50 = Unofficial)." : "). Wow!")}" +
                     $"\nRanking: https://terum.jp/tin/";
+                SetTweet(tweet);
             }
             else if (gstate == "Canceled")
             {
-                tweeterInputField.GetComponent<TMP_InputField>().text = $"GAVE UP a trial ({keys}/360 chars) on #TypingIsNonsense ..." +
+                string tweet =
+                    $"GAVE UP a trial ({keys}/360 chars) on #TypingIsNonsense ..." +
                     $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss})." +
                     $"\nRanking: https://terum.jp/tin/";
+                SetTweet(tweet);
             }
             else if (gstate == "Failed")
             {
-                tweeterInputField.GetComponent<TMP_InputField>().text = $"FAILED a miss <= {nowTrialData.MissLimit} challenge ({keys}/360 chars) on #TypingIsNonsense . OMG!" +
+                string tweet =
+                    $"FAILED a miss <= {nowTrialData.MissLimit} challenge ({keys}/360 chars) on #TypingIsNonsense . OMG!" +
                     $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss})." +
                     $"\nRanking: https://terum.jp/tin/";
+                SetTweet(tweet);
             }
         }
+    }
+    void SetTweet(string tweet)
+    {
+        tweeterInputField.GetComponent<TMP_InputField>().text = tweet;
     }
     void CopyToClickboard()
     {
@@ -127,11 +138,11 @@ public class TweeterManager : MonoBehaviour
     }
     void JumpToWebsite()
     {
-        // ƒQ[ƒ€’†‚Å‚à”½‰‚µ‚Ä‚µ‚Ü‚¤‚½‚ß
+        // ã‚²ãƒ¼ãƒ ä¸­ã§ã‚‚åå¿œã—ã¦ã—ã¾ã†ãŸã‚
         if (isTweeting) Application.OpenURL("https://terum.jp/tin/");
     }
 
-    // ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+    // ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
     public void OnGenerateTweetButtonClick()
     {
         GenerateTweet();
@@ -143,7 +154,7 @@ public class TweeterManager : MonoBehaviour
     public void OnJumpToWebsiteButtonClick() {
         JumpToWebsite();
     }
-    [System.Obsolete("ƒVƒ‡[ƒgƒJƒbƒgƒoƒCƒ“ƒh‹@”\‚Â‚¯‚½‚çA•¶š‚Ì”»•Ê•û–@‚ğ•ÏX—v")]
+    [System.Obsolete("ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆãƒã‚¤ãƒ³ãƒ‰æ©Ÿèƒ½ã¤ã‘ãŸã‚‰ã€æ–‡å­—ã®åˆ¤åˆ¥æ–¹æ³•ã‚’å¤‰æ›´è¦")]
     public void OnNormalKeyDown(ushort charID)
     {
         if (charID == 7) OnGenerateTweetButtonClick();

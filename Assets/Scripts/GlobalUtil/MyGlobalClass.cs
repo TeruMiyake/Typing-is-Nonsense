@@ -1,11 +1,11 @@
-/// ƒQ[ƒ€‘S‘Ì‚Åg—p‚·‚éƒNƒ‰ƒX‚â\‘¢‘Ì‚ğ’è‹`
-/// using System; ‚Í UnityEngine ‚Æd•¡‚·‚é•”•ª‚ª‚ ‚é‚Ì‚Ås‚í‚¸A–ˆ‰ñ–¾¦“I‚Ég‚¤
+ï»¿/// ã‚²ãƒ¼ãƒ å…¨ä½“ã§ä½¿ç”¨ã™ã‚‹ã‚¯ãƒ©ã‚¹ã‚„æ§‹é€ ä½“ã‚’å®šç¾©
+/// using System; ã¯ UnityEngine ã¨é‡è¤‡ã™ã‚‹éƒ¨åˆ†ãŒã‚ã‚‹ã®ã§è¡Œã‚ãšã€æ¯å›æ˜ç¤ºçš„ã«ä½¿ã†
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using System.Linq; // ”z—ñ‰Šú‰»—p
-using System.IO; // ƒtƒ@ƒCƒ‹‘€ì
+using System.Linq; // é…åˆ—åˆæœŸåŒ–ç”¨
+using System.IO; // ãƒ•ã‚¡ã‚¤ãƒ«æ“ä½œ
 
 #if UNITY_STANDALONE_WIN
 /// https://github.com/Elringus/UnityRawInput
@@ -14,14 +14,27 @@ using UnityRawInput;
 
 
 /// <summary>
-/// ƒgƒ‰ƒCƒAƒ‹ƒf[ƒ^
+/// ã‚²ãƒ¼ãƒ çŠ¶æ…‹ã‚’è¡¨ã™å‹
+/// </summary>
+enum GameState
+{
+    Waiting,
+    Countdown,
+    TrialOn,
+    Completed,
+    Canceled,
+    Failed
+}
+
+/// <summary>
+/// ãƒˆãƒ©ã‚¤ã‚¢ãƒ«ãƒ‡ãƒ¼ã‚¿
 /// </summary>
 [System.Serializable]
 public class TrialData
 {
     // not saved in .log
     public int MissLimit = 50;
-    public int[] LapMiss; // ‡Œvƒ~ƒX”•û®, [0] ‚Í”Ô•º
+    public int[] LapMiss; // åˆè¨ˆãƒŸã‚¹æ•°æ–¹å¼, [0] ã¯ç•ªå…µ
     // line 1
     public int LogVersion = 0;
     // line 2
@@ -29,55 +42,55 @@ public class TrialData
     public int CharMode = 0; // 0:normal
     public int Platform = 0; // 0:Win
     // line 3
-    // I—¹‚ÍŒµ–§‚Å‚È‚­‚Ä—Ç‚¢B•’i‚Í MinValue ‚É‚µ‚Ä‚¨‚«ASaveLog() ‚Ì‚İŒv‘ª
+    // çµ‚äº†æ™‚åˆ»ã¯å³å¯†ã§ãªãã¦è‰¯ã„ã€‚æ™®æ®µã¯ MinValue ã«ã—ã¦ãŠãã€SaveLog() æ™‚ã®ã¿è¨ˆæ¸¬
     public System.DateTime DateTimeWhenFinished = System.DateTime.MinValue;
     // line 4
     public bool IsTerminated = true; // 0:completed, 1:terminated
-    public int TypedKeys = 0; // GameMain.OnCorrectKeyDown() ‚ÅXV
+    public int TypedKeys = 0; // GameMain.OnCorrectKeyDown() ã§æ›´æ–°
     // line 5
-    // ‚»‚ê‚¼‚ê‚Ìƒ^ƒCƒ€Eƒ~ƒX‚Í‘S‚Äu‡Œvƒ^ƒCƒ€v‚Å“ü‚ê‚é‚Ì‚ÅA‘ÅŒ®ŠÔ‚ğo‚·‚É‚Íˆø‚«Z‚ª•K—v
-    // key ‚Ì”z—ñ‚Ì [0] ‚Í”Ô•º
-    public long TotalTime = 0; // ”÷–­itypedKeys‚ÆCorrectKeyTime‚©‚çZo‚Í‚Å‚«‚éj
+    // ãã‚Œãã‚Œã®ã‚¿ã‚¤ãƒ ãƒ»ãƒŸã‚¹ã¯å…¨ã¦ã€Œåˆè¨ˆã‚¿ã‚¤ãƒ ã€ã§å…¥ã‚Œã‚‹ã®ã§ã€æ‰“éµæ™‚é–“ã‚’å‡ºã™ã«ã¯å¼•ãç®—ãŒå¿…è¦
+    // key ã®é…åˆ—ã® [0] ã¯ç•ªå…µ
+    public long TotalTime = 0; // å¾®å¦™ï¼ˆtypedKeysã¨CorrectKeyTimeã‹ã‚‰ç®—å‡ºã¯ã§ãã‚‹ï¼‰
     public int TotalMiss = 0;
     // line 6
-    public long[] LapTime; // ‡Œvƒ^ƒCƒ€•û®, [0] ‚Í”Ô•º
+    public long[] LapTime; // åˆè¨ˆã‚¿ã‚¤ãƒ æ–¹å¼, [0] ã¯ç•ªå…µ
     // line 7
     public bool IsProtected = false;
     // line 8
     public ushort[] TaskCharIDs;
     // line 9
-    // ‡Œvƒ^ƒCƒ€•û®, [0] ‚Í”Ô•º
-    // GameMain.OnCorrectKeyDown() ‚ÅXV
+    // åˆè¨ˆã‚¿ã‚¤ãƒ æ–¹å¼, [0] ã¯ç•ªå…µ
+    // GameMain.OnCorrectKeyDown() ã§æ›´æ–°
     public long[] CorrectKeyTime;
     // line 10, 11
-    // ƒ~ƒX‚âƒVƒtƒgã‰º‚àŠÜ‚ß‚½A‘S‚Ä‚ÌƒL[“ü—Í‚ğ•ÛŠÇ‚·‚é
-    // Šî–{‚Í charID ‚Å“ü‚ê‚é‚ªAShiftDown:97, ShiftUp:98
-    // ‚Ü‚½AIDs[0] ‚É‚Í ‰ŠúƒVƒtƒgó‘Ôi0 ~ 2j‚ğŠi”[‚·‚éB> 0 ‚Å shifted
-    // GameMain.OnNormalKeyDown(), Shift(Down|Up)Handler() ‚ÅXV
-    // [0] ‰ŠúƒVƒtƒgó‘Ô‚Í GameMain.StartTrial() ‚Å“¾‚é
+    // ãƒŸã‚¹ã‚„ã‚·ãƒ•ãƒˆä¸Šä¸‹ã‚‚å«ã‚ãŸã€å…¨ã¦ã®ã‚­ãƒ¼å…¥åŠ›ã‚’ä¿ç®¡ã™ã‚‹
+    // åŸºæœ¬ã¯ charID ã§å…¥ã‚Œã‚‹ãŒã€ShiftDown:97, ShiftUp:98
+    // ã¾ãŸã€IDs[0] ã«ã¯ åˆæœŸã‚·ãƒ•ãƒˆçŠ¶æ…‹ï¼ˆ0 ~ 2ï¼‰ã‚’æ ¼ç´ã™ã‚‹ã€‚> 0 ã§ shifted
+    // GameMain.OnNormalKeyDown(), Shift(Down|Up)Handler() ã§æ›´æ–°
+    // [0] åˆæœŸã‚·ãƒ•ãƒˆçŠ¶æ…‹ã¯ GameMain.StartTrial() ã§å¾—ã‚‹
     public List<ushort> AllInputIDs = new List<ushort>();
-    // ‡Œvƒ^ƒCƒ€•û®, [0] ‚Í”Ô•ºi‰ŠúƒVƒtƒgó‘Ô = 0)
+    // åˆè¨ˆã‚¿ã‚¤ãƒ æ–¹å¼, [0] ã¯ç•ªå…µï¼ˆåˆæœŸã‚·ãƒ•ãƒˆçŠ¶æ…‹ = 0)
     public List<long> AllInputTime = new List<long>();
     // line 12 ~ 14
-    // ƒQ[ƒ€ŠJn‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Å“¾‚é
+    // ã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§å¾—ã‚‹
     KeyBind TrialKeyBind = new KeyBind();
 
-    // –¢À‘•
+    // æœªå®Ÿè£…
     //public string RegistrationCode;
 
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+    // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
     /// <summary>
-    /// GameMode ‚ğ–¾¦‚µ‚È‚¢ê‡AMODE:NONSENSE ‚Æ‰ğß‚·‚é
+    /// GameMode ã‚’æ˜ç¤ºã—ãªã„å ´åˆã€MODE:NONSENSE ã¨è§£é‡ˆã™ã‚‹
     /// </summary>
     public TrialData(): this(0) { }
     /// <summary>
-    /// MissLimit ‚ğ–¾¦‚µ‚È‚¢ê‡AMissLimit:50 ‚Æ‚·‚é
-    /// ‚Æ‚è‚ ‚¦‚¸¶¬‚µ‚½‚¢‚¾‚¯‚Ìê‡‚ÍA‚±‚ê‚Å—Ç‚¢
+    /// MissLimit ã‚’æ˜ç¤ºã—ãªã„å ´åˆã€MissLimit:50 ã¨ã™ã‚‹
+    /// ã¨ã‚Šã‚ãˆãšç”Ÿæˆã—ãŸã„ã ã‘ã®å ´åˆã¯ã€ã“ã‚Œã§è‰¯ã„
     /// </summary>
     public TrialData(int gameMode) : this(gameMode, 50) { }
     /// <summary>
-    /// ƒL[ƒoƒCƒ“ƒh‚ğw’è‚¹‚¸‚É MissLimit ‚ğ–¾¦‚µ‚Ä¶¬‚·‚é‚±‚Æ‚Í¡‚Ì‚Æ‚±‚ë‘z’è‚µ‚Ä‚¢‚È‚¢
-    /// ‚æ‚Á‚Ä’¼Úg‚¤‚±‚Æ‚Í–³‚³‚»‚¤‚È‚Ì‚ÅAˆê’U private ‚É‚µ‚Ä‚ ‚é
+    /// ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ã‚’æŒ‡å®šã›ãšã« MissLimit ã‚’æ˜ç¤ºã—ã¦ç”Ÿæˆã™ã‚‹ã“ã¨ã¯ä»Šã®ã¨ã“ã‚æƒ³å®šã—ã¦ã„ãªã„
+    /// ã‚ˆã£ã¦ç›´æ¥ä½¿ã†ã“ã¨ã¯ç„¡ã•ãã†ãªã®ã§ã€ä¸€æ—¦ private ã«ã—ã¦ã‚ã‚‹
     /// </summary>
     /// <param name="missLim"></param>
     /// <param name="gameMode"></param>
@@ -107,7 +120,7 @@ public class TrialData
         CorrectKeyTime = Enumerable.Repeat<long>(0, assignmentLength + 1).ToArray();
     }
     /// <summary>
-    /// ƒQ[ƒ€ŠJn‚Í‚±‚ê‚ğg‚¤BƒL[ƒoƒCƒ“ƒh‚ªŠù‚É”»–¾‚µ‚Ä‚¢‚é‚½‚ß
+    /// ã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ã¯ã“ã‚Œã‚’ä½¿ã†ã€‚ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ãŒæ—¢ã«åˆ¤æ˜ã—ã¦ã„ã‚‹ãŸã‚
     /// </summary>
     /// <param name="gameMode"></param>
     /// <param name="missLim"></param>
@@ -119,7 +132,7 @@ public class TrialData
 
     public void SaveLog()
     {
-        // ƒfƒBƒŒƒNƒgƒŠƒpƒX‚Ì¶¬
+        // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒ‘ã‚¹ã®ç”Ÿæˆ
         string saveDataDirPath = Application.dataPath + "/SaveData";
         string logDirPath;
         switch (GameMode)
@@ -144,7 +157,7 @@ public class TrialData
         if (!Directory.Exists(logDirPath))
             Directory.CreateDirectory(logDirPath);
 
-        // ƒtƒ@ƒCƒ‹ƒpƒXÚ“ª«‚Ì¶¬
+        // ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹æ¥é ­è¾ã®ç”Ÿæˆ
         string filePath = logDirPath;
         switch (GameMode)
         {
@@ -166,7 +179,7 @@ public class TrialData
                 break;
         }
 
-        // ƒtƒ@ƒCƒ‹ƒpƒX–{‘Ì‚Ì¶¬
+        // ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹æœ¬ä½“ã®ç”Ÿæˆ
         filePath += DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff") + ".log";
         if (!File.Exists(filePath))
         {
@@ -192,8 +205,8 @@ public class TrialData
     }
 
     /// <summary>
-    /// 1-indexed ‚Ì lap ’l‚ğó‚¯æ‚èAlong ‚Ìƒ‰ƒbƒvƒ^ƒCƒ€i‡Œv’lj‚ğ•Ô‚·
-    /// Assert(0 <= lap); (0) ‚Í”Ô•º
+    /// 1-indexed ã® lap å€¤ã‚’å—ã‘å–ã‚Šã€long ã®ãƒ©ãƒƒãƒ—ã‚¿ã‚¤ãƒ ï¼ˆåˆè¨ˆå€¤ï¼‰ã‚’è¿”ã™
+    /// Assert(0 <= lap); (0) ã¯ç•ªå…µ
     /// </summary>
     /// <param name="lap"></param>
     /// <returns></returns>
@@ -203,28 +216,28 @@ public class TrialData
         return LapTime[lap];
     }
     /// <summary>
-    /// 1-indexed ‚Ì lap ’l‚ğó‚¯æ‚èAlong ‚Ìƒ‰ƒbƒvƒ^ƒCƒ€i‡Œv’l‚ğˆø‚«Z‚µ‚½‚à‚Ìj‚ğ•Ô‚·
+    /// 1-indexed ã® lap å€¤ã‚’å—ã‘å–ã‚Šã€long ã®ãƒ©ãƒƒãƒ—ã‚¿ã‚¤ãƒ ï¼ˆåˆè¨ˆå€¤ã‚’å¼•ãç®—ã—ãŸã‚‚ã®ï¼‰ã‚’è¿”ã™
     /// </summary>
     /// <param name="lap"></param>
     /// <returns></returns>
     public long GetSingleLapTime(int lap)
     {
         Debug.Assert(0 <= lap);
-        // ƒ‰ƒbƒv 0 ‚Í”Ô•º
+        // ãƒ©ãƒƒãƒ— 0 ã¯ç•ªå…µ
         if (lap == 0) return 0;
         else return LapTime[lap] - LapTime[lap - 1];
     }
     public void SetLapTime(int lap, long lapTime)
     {
         Debug.Assert(1 <= lap);
-        // ƒ‰ƒbƒv 0 ‚Í”Ô•º
+        // ãƒ©ãƒƒãƒ— 0 ã¯ç•ªå…µ
         LapTime[lap] = lapTime;
     }
 }
 
 
 /// <summary>
-/// ’jNullKeyMap ‚ÍƒL[ƒoƒCƒ“ƒh’†‚ÉXV‚³‚ê‚¸AKeyBind.SaveToJson() ‚ÉXV‚³‚ê‚é
+/// æ³¨ï¼‰NullKeyMap ã¯ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ä¸­ã«æ›´æ–°ã•ã‚Œãšã€KeyBind.SaveToJson() æ™‚ã«æ›´æ–°ã•ã‚Œã‚‹
 /// </summary>
 [System.Serializable]
 public class KeyBind
@@ -235,7 +248,7 @@ public class KeyBind
 
     public KeyBind()
     {
-        // ƒfƒtƒHƒ‹ƒg‚ğƒZƒbƒg
+        // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚’ã‚»ãƒƒãƒˆ
         SetToDefault("JIS");
     }
     public KeyBind(string def)
@@ -248,7 +261,7 @@ public class KeyBind
         switch (def)
         {
             case "JIS":
-                // ¡‚ÍŒÅ’è‚Å JIS ”z—ñ‚Ìƒf[ƒ^‚ª“ü‚Á‚Ä‚¢‚é‚ªA‚¢‚Â‚© US ‚â UK ‚È‚Ç‚ğì‚Á‚ÄƒAƒZƒbƒg‚É‚µ‚Ä‚¢‚­
+                // ä»Šã¯å›ºå®šã§ JIS é…åˆ—ã®ãƒ‡ãƒ¼ã‚¿ãŒå…¥ã£ã¦ã„ã‚‹ãŒã€ã„ã¤ã‹ US ã‚„ UK ãªã©ã‚’ä½œã£ã¦ã‚¢ã‚»ãƒƒãƒˆã«ã—ã¦ã„ã
                 RawKeyMap = new ushort[] { 16, 16, 32, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 189, 222, 220, 192, 219, 187, 186, 221, 188, 190, 191, 226 };
                 NullKeyMap = new ushort[] { 39, 84 };
                 CharMap = " abcdefghijklmnopqrstuvwxyz1234567890-^\0@[;:],./\\ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()\0=~|`{+*}<>?_".ToCharArray();
@@ -256,8 +269,8 @@ public class KeyBind
             case "US":
                 KeyBind loaded = JsonUtility.FromJson<KeyBind>("{ \"RawKeyMap\":[16,16,32,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,49,50,51,52,53,54,55,56,57,48,189,187,192,219,221,220,186,222,188,190,191,35],\"NullKeyMap\":[48,96],\"CharMap\":[32,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,49,50,51,52,53,54,55,56,57,48,45,61,96,91,93,92,59,39,44,46,47,0,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,33,64,35,36,37,94,38,42,40,41,95,43,126,123,125,124,58,34,60,62,63,0]}");
 
-                // “Ç‚İ‚ñ‚¾ KeyBind ‚ªƒoƒŠƒf[ƒVƒ‡ƒ“‚ğ’Ê‚ê‚ÎÌ—p
-                // MyKeyBind0.json ‚Ö‚Ì•Û‘¶‚Íƒ†[ƒU‚ª SAVE ‚·‚é‚Ü‚Å‚Ís‚í‚È‚¢
+                // èª­ã¿è¾¼ã‚“ã  KeyBind ãŒãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’é€šã‚Œã°æ¡ç”¨
+                // MyKeyBind0.json ã¸ã®ä¿å­˜ã¯ãƒ¦ãƒ¼ã‚¶ãŒ SAVE ã™ã‚‹ã¾ã§ã¯è¡Œã‚ãªã„
                 string errMsg = "";
                 if (loaded.ValidationCheck(ref errMsg))
                 {
@@ -280,13 +293,13 @@ public class KeyBind
     public bool ValidationCheck(ref string ErrorMsg)
     {
         bool ret = true;
-        // RawKeyMap ‚ğƒ`ƒFƒbƒN
+        // RawKeyMap ã‚’ãƒã‚§ãƒƒã‚¯
         Debug.Assert(RawKeyMap.Length == 51);
         HashSet<ushort> rawKeys = new HashSet<ushort>();
         for (int i = 0; i < RawKeyMap.Length; i++)
         {
-            // RawKey ‚Ìd•¡‚Í‹–‚³‚È‚¢‚ªAKeyID:1 ‚Åd•¡‚ªo‚é‚Ì‚Í OKiƒVƒtƒgƒL[‚Ìd•¡‚¾‚©‚çj
-            // KeyID: 0 -> 1 ‚Ì‡‚ÅŒ©‚Ä‚¢‚é‚©‚çA1 ‚Åd•¡‚ªo‚éƒVƒtƒgƒL[‚Ìd•¡‚Æ’f’è‰Â”\
+            // RawKey ã®é‡è¤‡ã¯è¨±ã•ãªã„ãŒã€KeyID:1 ã§é‡è¤‡ãŒå‡ºã‚‹ã®ã¯ OKï¼ˆã‚·ãƒ•ãƒˆã‚­ãƒ¼ã®é‡è¤‡ã ã‹ã‚‰ï¼‰
+            // KeyID: 0 -> 1 ã®é †ã§è¦‹ã¦ã„ã‚‹ã‹ã‚‰ã€1 ã§é‡è¤‡ãŒå‡ºã‚‹ï¼ã‚·ãƒ•ãƒˆã‚­ãƒ¼ã®é‡è¤‡ã¨æ–­å®šå¯èƒ½
             if (rawKeys.Contains(RawKeyMap[i]) && i != 1)
             {
                 ErrorMsg += $"Duplicated Raw Key: {RawKeyMap[i]} (KeyID: {i})\n";
@@ -300,11 +313,11 @@ public class KeyBind
             rawKeys.Add(RawKeyMap[i]);
         }
 
-        // NullKeyMap ‚Íƒ`ƒFƒbƒN‚µ‚È‚¢iCharMap ‚ª³‚µ‚¯‚ê‚Î Save ‚É³‚µ‚­¶¬‚³‚ê‚éj
+        // NullKeyMap ã¯ãƒã‚§ãƒƒã‚¯ã—ãªã„ï¼ˆCharMap ãŒæ­£ã—ã‘ã‚Œã° Save æ™‚ã«æ­£ã—ãç”Ÿæˆã•ã‚Œã‚‹ï¼‰
 
-        // CharMap ‚ğƒ`ƒFƒbƒN
+        // CharMap ã‚’ãƒã‚§ãƒƒã‚¯
         Debug.Assert(CharMap.Length == 97);
-        // d•¡ƒ`ƒFƒbƒN
+        // é‡è¤‡ãƒã‚§ãƒƒã‚¯
         HashSet<ushort> chars = new HashSet<ushort>();
         for (int i = 0; i < 97; i++)
         {
@@ -315,7 +328,7 @@ public class KeyBind
             }
             chars.Add(CharMap[i]);
         }
-        // Unshifted: 0 ~ 48 ‚É null ‚ª 1 ‚Â•K—v
+        // Unshifted: 0 ~ 48 ã« null ãŒ 1 ã¤å¿…è¦
         int l_null = 0;
         for (int i = 0; i < 49; i++) if (CharMap[i] == '\0') l_null++;
         if (l_null != 1)
@@ -323,7 +336,7 @@ public class KeyBind
             ErrorMsg += $"You need 1 (NULL) in Char (Unshifted). Now: {l_null}\n";
             ret = false;
         }
-        // Unshifted: 49 ~ 96 ‚É null ‚ª 1 ‚Â•K—v
+        // Unshifted: 49 ~ 96 ã« null ãŒ 1 ã¤å¿…è¦
         int r_null = 0;
         for (int i = 49; i < 97; i++) if (CharMap[i] == '\0') r_null++;
         if (r_null != 1)
@@ -336,7 +349,7 @@ public class KeyBind
     }
 
     /// <summary>
-    /// ƒZ[ƒuEƒ[ƒh slot 0 ‚Íu¡Ì—p‚µ‚Ä‚¢‚éƒL[ƒoƒCƒ“ƒhv‚ğ¦‚·
+    /// ã‚»ãƒ¼ãƒ–ãƒ»ãƒ­ãƒ¼ãƒ‰ slot 0 ã¯ã€Œä»Šæ¡ç”¨ã—ã¦ã„ã‚‹ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ã€ã‚’ç¤ºã™
     /// </summary>
     /// <param name="slot"></param>
     public void SaveToJson(ushort slot)
@@ -370,8 +383,8 @@ public class KeyBind
         }
     }
     /// <summary>
-    /// MyKeyBind{slot}.json ‚©‚ç KeyBind ƒNƒ‰ƒX‚Éƒf[ƒ^‚ğƒ[ƒh‚·‚é
-    /// ‚±‚Ì“_‚Å‚ÍAÀÛ‚Ég—p‚µ‚Ä‚¢‚éƒL[ƒoƒCƒ“ƒhiMyKeyBind0.jsonj‚É‚Í”½‰f‚µ‚È‚¢
+    /// MyKeyBind{slot}.json ã‹ã‚‰ KeyBind ã‚¯ãƒ©ã‚¹ã«ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
+    /// ã“ã®æ™‚ç‚¹ã§ã¯ã€å®Ÿéš›ã«ä½¿ç”¨ã—ã¦ã„ã‚‹ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰ï¼ˆMyKeyBind0.jsonï¼‰ã«ã¯åæ˜ ã—ãªã„
     /// </summary>
     /// <param name="slot"></param>
     public void LoadFromJson(ushort slot)
@@ -387,7 +400,7 @@ public class KeyBind
             reader.Close();
             KeyBind loaded = JsonUtility.FromJson<KeyBind>(loadedjson);
 
-            // “Ç‚İ‚ñ‚¾ KeyBind ‚ªƒoƒŠƒf[ƒVƒ‡ƒ“‚ğ’Ê‚ê‚ÎÌ—p‚µ‚Ä slot 0 ‚É•ÛŠÇ
+            // èª­ã¿è¾¼ã‚“ã  KeyBind ãŒãƒãƒªãƒ‡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’é€šã‚Œã°æ¡ç”¨ã—ã¦ slot 0 ã«ä¿ç®¡
             string errMsg = "";
             if (loaded.ValidationCheck(ref errMsg))
             {
@@ -407,7 +420,7 @@ public class KeyBind
 }
 
 /// <summary>
-/// PlayerPrefs ‚É“ü‚ê‚éİ’è
+/// PlayerPrefs ã«å…¥ã‚Œã‚‹è¨­å®š
 /// </summary>
 [System.Serializable]
 public class Config
@@ -429,11 +442,11 @@ public class Config
 [System.Obsolete("When implementing UtilKeyBinding, changes needed.")]
 public class KeyBindDicts
 {
-    // KeyID ‚Æ CharIDiKey ‚ÉƒAƒTƒCƒ“‚³‚ê‚½•¶šjŠÔ‚Ì•ÏŠ·
+    // KeyID ã¨ CharIDï¼ˆKey ã«ã‚¢ã‚µã‚¤ãƒ³ã•ã‚ŒãŸæ–‡å­—ï¼‰é–“ã®å¤‰æ›
     public Dictionary<ushort, ushort> dictToKeyID_FromCharID;
     public Dictionary<ushort, ushort> dictToCharID_FromKeyID;
 
-    // Char ‚Æ CharID ŠÔ‚Ì•ÏŠ·
+    // Char ã¨ CharID é–“ã®å¤‰æ›
     public Dictionary<ushort, char> dictToChar_FromCharID;
     public Dictionary<char, ushort> dictToCharID_FromChar;
 
@@ -441,7 +454,7 @@ public class KeyBindDicts
     public Dictionary<RawKey, ushort> dictToKeyID_FromRawKey = new Dictionary<RawKey, ushort>();
 #endif
 
-    // ƒL[ƒoƒCƒ“ƒh‹@”\‚ğ‚Â‚¯‚½‚©‚çˆø”‚È‚µ‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Í•s—vBŒÄ‚×‚È‚¢‚æ‚¤‚É‚·‚é
+    // ã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰æ©Ÿèƒ½ã‚’ã¤ã‘ãŸã‹ã‚‰å¼•æ•°ãªã—ã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã¯ä¸è¦ã€‚å‘¼ã¹ãªã„ã‚ˆã†ã«ã™ã‚‹
     private KeyBindDicts() { }
     public KeyBindDicts(KeyBind keyBind)
     {
@@ -474,12 +487,12 @@ public class KeyBindDicts
                 dictToCharID_FromKeyID[(ushort)(i + 2)] = (ushort)i;
             }
         }
-        // “ÁêƒL[‚Ìˆ—i‚»‚Ì‚¤‚¿ƒoƒCƒ“ƒh‚ğ Config ‚È‚Ç‚©‚ç—¬‚µ‚Ş‹@”\‚ğ‚Â‚¯‚éj
+        // ç‰¹æ®Šã‚­ãƒ¼ã®å‡¦ç†ï¼ˆãã®ã†ã¡ãƒã‚¤ãƒ³ãƒ‰ã‚’ Config ãªã©ã‹ã‚‰æµã—è¾¼ã‚€æ©Ÿèƒ½ã‚’ã¤ã‘ã‚‹ï¼‰
         dictToKeyID_FromRawKey[RawKey.Return] = 100; // 13
         dictToKeyID_FromRawKey[RawKey.Escape] = 101; // 27
     }
 
-    // ƒƒ\ƒbƒh
+    // ãƒ¡ã‚½ãƒƒãƒ‰
 #if UNITY_STANDALONE_WIN
     public ushort ToKeyID_FromRawKey(RawKey key)
     {
@@ -487,10 +500,10 @@ public class KeyBindDicts
     }
 #endif
 
-    // ‚±‚±‚©‚çAƒvƒ‰ƒbƒgƒtƒH[ƒ€‚ÉˆË‘¶‚µ‚È‚¢ˆ—
-    // ‚±‚Ì“_‚Ü‚Å‚ÅA“ü—Í‚Í‘S‚Ä KeyID ‚É•ÏŠ·‚³‚ê‚Ä‚¢‚é
+    // ã“ã“ã‹ã‚‰ã€ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã«ä¾å­˜ã—ãªã„å‡¦ç†
+    // ã“ã®æ™‚ç‚¹ã¾ã§ã§ã€å…¥åŠ›ã¯å…¨ã¦ KeyID ã«å¤‰æ›ã•ã‚Œã¦ã„ã‚‹
 
-    // KeyID ‚Æ CharIDiKey ‚ÉƒAƒTƒCƒ“‚³‚ê‚½•¶šjŠÔ‚Ì•ÏŠ·
+    // KeyID ã¨ CharIDï¼ˆKey ã«ã‚¢ã‚µã‚¤ãƒ³ã•ã‚ŒãŸæ–‡å­—ï¼‰é–“ã®å¤‰æ›
     public ushort ToKeyID_FromCharID(ushort charID)
     {
         return dictToKeyID_FromCharID[charID];
@@ -500,7 +513,7 @@ public class KeyBindDicts
         return dictToCharID_FromKeyID[keyID];
     }
 
-    // Char ‚Æ CharID ŠÔ‚Ì•ÏŠ·
+    // Char ã¨ CharID é–“ã®å¤‰æ›
     public char ToChar_FromCharID(ushort charID)
     {
         return dictToChar_FromCharID[charID];

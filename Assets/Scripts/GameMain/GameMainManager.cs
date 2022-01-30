@@ -9,22 +9,12 @@ using TMPro; // スクリプトから TextMeshPro の変更
 
 public class GameMainManager : MonoBehaviour
 {
-    // ゲーム状態変数
-    enum GameState
-    {
-        Waiting,
-        Countdown,
-        TrialOn,
-        Completed,
-        Canceled,
-        Failed
-    }
     GameState gameState = GameState.Waiting;
 
     // ScriptableObject
     [SerializeField]
     KeyBind keyBind;
-    KeyBindDicts dicts;
+    KeyBindDicts keyBindDicts;
 
     // 部下となるシーン内のマネジャー達
     TweeterManager tweeter;
@@ -77,6 +67,9 @@ public class GameMainManager : MonoBehaviour
     const int lapLength = 36;
     const int numOfLaps = 10;
 
+    // 色設定
+    Color typedCharColor = new Color(0.25f, 0.15f, 0.15f, 0.1f);
+
     // ストップウォッチ
     System.Diagnostics.Stopwatch myStopwatch;
 
@@ -84,7 +77,7 @@ public class GameMainManager : MonoBehaviour
     {
         keyBind = new KeyBind();
         keyBind.LoadFromJson(0);
-        dicts = new KeyBindDicts(keyBind);
+        keyBindDicts = new KeyBindDicts(keyBind);
 
         // 部下を見つける
         tweeter = GameObject.Find("Tweeter").GetComponent<TweeterManager>();
@@ -146,6 +139,10 @@ public class GameMainManager : MonoBehaviour
     }
 
     // 部下とのやり取り
+    /// <summary>
+    /// TweeterManager が表示すべき TrialData を取得するためのメソッド
+    /// </summary>
+    /// <returns></returns>
     public System.Tuple<string, TrialData> GetTrialData()
     {
         if (gameState == GameState.TrialOn || gameState == GameState.Waiting)
@@ -214,8 +211,6 @@ public class GameMainManager : MonoBehaviour
         }
 
         // RNGCryptoServiceProvider は IDisposable インターフェイスを実装していて、使用が完了したら型を破棄しなきゃいけないらしい（公式ドキュメントより）
-        // IDisposable インターフェイスには Dispose() というメソッドだけが実装されている
-        // これを継承するクラスは、「リソースを抱え込んでるから使い終わったら（GC を待たず）Dispose() で破棄した方がいい」と考えればいいだろう
         rng.Dispose();
     }
     /// <summary>
@@ -241,11 +236,10 @@ public class GameMainManager : MonoBehaviour
         {
             assignedCharTMPs[i] = Instantiate(AssignedCharTMPPrefab, asg.transform);
             TextMeshProUGUI assignedCharTMPUGUI = assignedCharTMPs[i].GetComponent<TextMeshProUGUI>();
-            assignedCharTMPUGUI.text = dicts.ToChar_FromCharID(nowTrialData.TaskCharIDs[i]).ToString();
+            assignedCharTMPUGUI.text = keyBindDicts.ToChar_FromCharID(nowTrialData.TaskCharIDs[i]).ToString();
 
             // 表示場所の指定
             assignedCharTMPs[i].GetComponent<RectTransform>().localPosition = new Vector3(displayInitX + displayCharXdiff * (i % lapLength), displayInitY + displayCharYdiff * (i / lapLength), 0);
-            //assignedCharTMPs[i].GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
         }
 
         // 処理が終わってからゲーム開始＆ストップウォッチを開始
@@ -392,7 +386,10 @@ public class GameMainManager : MonoBehaviour
     // トライアル制御
     void OnCorrectKeyDown()
     {
-        assignedCharTMPs[nowTrialData.TypedKeys].GetComponent<TextMeshProUGUI>().color = new UnityEngine.Color(0.25f, 0.15f, 0.15f, 0.1f);
+        int idx = nowTrialData.TypedKeys;
+        TextMeshProUGUI typedCharTMPUGUI
+            = assignedCharTMPs[idx].GetComponent<TextMeshProUGUI>();
+        typedCharTMPUGUI.color = typedCharColor;
 
         // nowTrialData の更新処理
         // ここでトータルタイムは入力しない（OnNormalButtonClick() で入力してあるため）

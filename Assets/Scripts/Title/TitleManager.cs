@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class TitleManager : MonoBehaviour
@@ -12,7 +12,7 @@ public class TitleManager : MonoBehaviour
     {
         dicts = new KeyBindDicts(keyBind);
 
-        // EventBus ‚ÉƒL[‰Ÿ‰ºƒCƒxƒ“ƒg”­¶‚Ìƒƒ\ƒbƒhÀs‚ğˆË—Š *Unsubscribe –Y‚ê‚¸I
+        // EventBus ã«ã‚­ãƒ¼æŠ¼ä¸‹ã‚¤ãƒ™ãƒ³ãƒˆç™ºç”Ÿæ™‚ã®ãƒ¡ã‚½ãƒƒãƒ‰å®Ÿè¡Œã‚’ä¾é ¼ *Unsubscribe å¿˜ã‚Œãšï¼
         EventBus.Instance.SubscribeNormalKeyDown(OnNormalKeyDown);
     }
 
@@ -40,7 +40,7 @@ public class TitleManager : MonoBehaviour
         Application.Quit();
     }
 
-    // ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+    // ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
     public void OnKeybindingStartButtonClick()
     {
         MySceneManager.ChangeSceneRequest("KeybindingScene");
@@ -58,7 +58,7 @@ public class TitleManager : MonoBehaviour
         Debug.Log("Bye...");
         ExitGame();
     }
-    [System.Obsolete("ƒoƒCƒ“ƒh‹@”\‚Â‚¯‚½‚çA•¶š‚Ì”»•Ê•û–@‚ğ•ÏX—v")]
+    [System.Obsolete("ãƒã‚¤ãƒ³ãƒ‰æ©Ÿèƒ½ã¤ã‘ãŸã‚‰ã€æ–‡å­—ã®åˆ¤åˆ¥æ–¹æ³•ã‚’å¤‰æ›´è¦")]
     public void OnNormalKeyDown(ushort charID)
     {
         Debug.Log("normalkeydown");

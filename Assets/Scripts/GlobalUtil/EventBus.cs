@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,8 +8,8 @@ using UnityRawInput;
 #endif
 
 /// <summary>
-/// ƒNƒ‰ƒX EventBus
-/// ŠeƒNƒ‰ƒX‚©‚çƒŠƒAƒ‹ƒ^ƒCƒ€‚ÉƒCƒxƒ“ƒg”­¶’Ê’m‚ğó‚¯æ‚èA“o˜^‚³‚ê‚½ƒfƒŠƒQ[ƒg‚ğÀs‚·‚é
+/// ã‚¯ãƒ©ã‚¹ EventBus
+/// å„ã‚¯ãƒ©ã‚¹ã‹ã‚‰ãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ã«ã‚¤ãƒ™ãƒ³ãƒˆç™ºç”Ÿé€šçŸ¥ã‚’å—ã‘å–ã‚Šã€ç™»éŒ²ã•ã‚ŒãŸãƒ‡ãƒªã‚²ãƒ¼ãƒˆã‚’å®Ÿè¡Œã™ã‚‹
 ///  https://indie-du.com/entry/2017/05/26/130000
 /// </summary>
 public class EventBus
@@ -32,13 +32,13 @@ public class EventBus
 
     }
 
-    // ‘¼‚ÌƒNƒ‰ƒX‚ªu©•ª‚ª’Ê’m‚ğó‚¯æ‚Á‚½‚ÉÀs‚µ‚Ä‚Ù‚µ‚¢ƒR[ƒ‹ƒoƒbƒNŠÖ”v‚Ì“o˜^‚ğ‚·‚é‚½‚ß‚ÌƒfƒŠƒQ[ƒg
+    // ä»–ã®ã‚¯ãƒ©ã‚¹ãŒã€Œè‡ªåˆ†ãŒé€šçŸ¥ã‚’å—ã‘å–ã£ãŸæ™‚ã«å®Ÿè¡Œã—ã¦ã»ã—ã„ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã€ã®ç™»éŒ²ã‚’ã™ã‚‹ãŸã‚ã®ãƒ‡ãƒªã‚²ãƒ¼ãƒˆ
     public delegate void OnNormalKeyDown(ushort keyID);
     public delegate void OnReturnKeyDown();
     public delegate void OnEscKeyDown();
-    public delegate void OnKeyBindChanged();
     public delegate void OnShiftKeyDown();
     public delegate void OnShiftKeyUp();
+    public delegate void OnKeyBindChanged();
     private event OnNormalKeyDown _onNormalKeyDown;
     private event OnReturnKeyDown _onReturnKeyDown;
     private event OnEscKeyDown _onEscKeyDown;
@@ -50,7 +50,7 @@ public class EventBus
 #endif
     private event OnKeyBindChanged _onKeyBindChanged;
 
-    // ‘¼‚ÌƒNƒ‰ƒX‚ª’Ê’mó‚¯æ‚èiEventBus‚Ö‚ÌƒfƒŠƒQ[ƒg“o˜^j‚ğ‚·‚é‚½‚ß‚Ìƒƒ\ƒbƒh
+    // ä»–ã®ã‚¯ãƒ©ã‚¹ãŒé€šçŸ¥å—ã‘å–ã‚Šï¼ˆï¼EventBusã¸ã®ãƒ‡ãƒªã‚²ãƒ¼ãƒˆç™»éŒ²ï¼‰ã‚’ã™ã‚‹ãŸã‚ã®ãƒ¡ã‚½ãƒƒãƒ‰
 #if UNITY_STANDALONE_WIN
     public void SubscribeRawKeyDown(OnRawKeyDown onRawKeyDown)
     {
@@ -83,7 +83,7 @@ public class EventBus
         _onKeyBindChanged += onKeyBindChanged;
     }
 
-    // ‘¼‚ÌƒNƒ‰ƒX‚ª’Ê’mó‚¯æ‚è‰ğœ‚ğ‚·‚é‚½‚ß‚Ìƒƒ\ƒbƒh
+    // ä»–ã®ã‚¯ãƒ©ã‚¹ãŒé€šçŸ¥å—ã‘å–ã‚Šè§£é™¤ã‚’ã™ã‚‹ãŸã‚ã®ãƒ¡ã‚½ãƒƒãƒ‰
 #if UNITY_STANDALONE_WIN
     public void UnsubscribeRawKeyDown(OnRawKeyDown onRawKeyDown)
     {
@@ -115,7 +115,7 @@ public class EventBus
         _onKeyBindChanged -= onKeyBindChanged;
     }
 
-    // ‘¼‚ÌƒNƒ‰ƒX‚©‚çAEventBus ‚É’Ê’m‚ğˆË—Š‚·‚éƒƒ\ƒbƒh
+    // ä»–ã®ã‚¯ãƒ©ã‚¹ã‹ã‚‰ã€EventBus ã«é€šçŸ¥ã‚’ä¾é ¼ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰
 #if UNITY_STANDALONE_WIN
     public void NotifyRawKeyDown(RawKey key)
     {
