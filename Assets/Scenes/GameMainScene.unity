@@ -2106,7 +2106,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.6981132, g: 0.32600567, b: 0.32600567, a: 0}
+  m_BackGroundColor: {r: 0.34117648, g: 0.19607845, b: 0.18431373, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -2623,6 +2623,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b61c06323f1f90a4fae92c3122a7c844, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameMode: 0
   missLimitInput: {fileID: 1574305177}
 --- !u!1 &771885881
 GameObject:
@@ -4244,7 +4245,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 757389268}
         m_TargetAssemblyTypeName: SimpleConfigurerManager, Assembly-CSharp
-        m_MethodName: onMissLimitEndEdit
+        m_MethodName: OnMissLimitEndEdit
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5355,8 +5356,10 @@ GameObject:
   - component: {fileID: 1866556427}
   - component: {fileID: 1866556426}
   - component: {fileID: 1866556428}
+  - component: {fileID: 1866556430}
+  - component: {fileID: 1866556429}
   m_Layer: 0
-  m_Name: GameMainManager
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5379,32 +5382,6 @@ MonoBehaviour:
     NullKeyMap: 27005400
     CharMap: 20006100620063006400650066006700680069006a006b006c006d006e006f0070007100720073007400750076007700780079007a0031003200330034003500360037003800390030002d005e0040005b003b003a005d002c002e002f005c004100420043004400450046004700480049004a004b004c004d004e004f0050005100520053005400550056005700580059005a002100220023002400250026002700280029003d007e007c0060007b002b002a007d003c003e003f005f005d00
   MissLimitInput: {fileID: 1574305177}
-  AssignedCharTMPPrefab: {fileID: 546558923873041206, guid: 473d398a666a3d346aa0868f39d5693e, type: 3}
-  TotalTimeTMP: {fileID: 236894038}
-  TotalMissTMP: {fileID: 887807394}
-  LapTimeTMP:
-  - {fileID: 1587952928}
-  - {fileID: 746358944}
-  - {fileID: 1460413384}
-  - {fileID: 326651284}
-  - {fileID: 1437481801}
-  - {fileID: 1865606191}
-  - {fileID: 1930810289}
-  - {fileID: 1754729238}
-  - {fileID: 1285083251}
-  - {fileID: 1427380680}
-  LapMissTMP:
-  - {fileID: 913889799}
-  - {fileID: 1838746139}
-  - {fileID: 596064243}
-  - {fileID: 1794270610}
-  - {fileID: 622862077}
-  - {fileID: 2141303932}
-  - {fileID: 809731921}
-  - {fileID: 743677391}
-  - {fileID: 1262156914}
-  - {fileID: 1431862167}
-  TotalCPSTMP: {fileID: 1139087778}
 --- !u!4 &1866556427
 Transform:
   m_ObjectHideFlags: 0
@@ -5501,6 +5478,58 @@ MonoBehaviour:
   m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &1866556429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866556425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 330be204a5992a142ac9ba9232c5b3e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameMode: 0
+  AssignedCharTMPPrefab: {fileID: 546558923873041206, guid: 473d398a666a3d346aa0868f39d5693e, type: 3}
+  TotalTimeTMP: {fileID: 236894038}
+  TotalMissTMP: {fileID: 887807394}
+  LapTimeTMP:
+  - {fileID: 1587952928}
+  - {fileID: 746358944}
+  - {fileID: 1460413384}
+  - {fileID: 326651284}
+  - {fileID: 1437481801}
+  - {fileID: 1865606191}
+  - {fileID: 1930810289}
+  - {fileID: 1754729238}
+  - {fileID: 1285083251}
+  - {fileID: 1427380680}
+  LapMissTMP:
+  - {fileID: 913889799}
+  - {fileID: 1838746139}
+  - {fileID: 596064243}
+  - {fileID: 1794270610}
+  - {fileID: 622862077}
+  - {fileID: 2141303932}
+  - {fileID: 809731921}
+  - {fileID: 743677391}
+  - {fileID: 1262156914}
+  - {fileID: 1431862167}
+  TotalCPSTMP: {fileID: 1139087778}
+--- !u!114 &1866556430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866556425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc09d0998d7dd9f4980aeba1db20de36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameMode: 0
 --- !u!1001 &1881190359
 PrefabInstance:
   m_ObjectHideFlags: 0

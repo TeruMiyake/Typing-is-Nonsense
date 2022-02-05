@@ -16,7 +16,7 @@ using UnityRawInput;
 /// <summary>
 /// ゲーム状態を表す型
 /// </summary>
-enum GameState
+public enum GameState
 {
     Waiting,
     Countdown,
@@ -24,6 +24,45 @@ enum GameState
     Completed,
     Canceled,
     Failed
+}
+
+/// <summary>
+/// ミリ秒型（long <-> MilliSecond は暗黙的に型変換できる）
+/// </summary>
+public class MilliSecond : System.IEquatable<MilliSecond>, System.IComparable<MilliSecond>
+{
+    public long ms;
+    public MilliSecond(long _ms) { ms = _ms; }
+    public static implicit operator long(MilliSecond milliSecond)
+    {
+        return milliSecond.ms;
+    }
+    public static implicit operator MilliSecond(long _ms)
+    {
+        return new MilliSecond(_ms);
+    }
+    public static implicit operator string(MilliSecond milliSecond)
+    {
+        return milliSecond.ms.ToString();
+    }
+    /// <summary>
+    /// long で保存してあるミリ秒を、表示用の "X.XXX" s に変える
+    /// </summary>
+    /// <param name="ms"></param>
+    /// <returns></returns>
+    public string ToFormattedTime()
+    {
+        return (ms / 1000).ToString() + "." + (ms % 1000).ToString("000");
+    }
+
+    // インタフェース
+    public bool Equals(MilliSecond other) => ms == other.ms;
+    public int CompareTo(MilliSecond other)
+    {
+        if (ms > other.ms) return 1;
+        else if (ms == other.ms) return 0;
+        else return -1;
+    }
 }
 
 /// <summary>
@@ -50,10 +89,10 @@ public class TrialData
     // line 5
     // それぞれのタイム・ミスは全て「合計タイム」で入れるので、打鍵時間を出すには引き算が必要
     // key の配列の [0] は番兵
-    public long TotalTime = 0; // 微妙（typedKeysとCorrectKeyTimeから算出はできる）
+    public MilliSecond TotalTime = 0; // 微妙（typedKeysとCorrectKeyTimeから算出はできる）
     public int TotalMiss = 0;
     // line 6
-    public long[] LapTime; // 合計タイム方式, [0] は番兵
+    public MilliSecond[] LapTime; // 合計タイム方式, [0] は番兵
     // line 7
     public bool IsProtected = false;
     // line 8
@@ -61,7 +100,7 @@ public class TrialData
     // line 9
     // 合計タイム方式, [0] は番兵
     // GameMain.OnCorrectKeyDown() で更新
-    public long[] CorrectKeyTime;
+    public MilliSecond[] CorrectKeyTime;
     // line 10, 11
     // ミスやシフト上下も含めた、全てのキー入力を保管する
     // 基本は charID で入れるが、ShiftDown:97, ShiftUp:98
@@ -115,9 +154,9 @@ public class TrialData
         LapMiss = Enumerable.Repeat<int>(0, numOfLaps + 1).ToArray();
         // saved in .log
         GameMode = gameMode;
-        LapTime = Enumerable.Repeat<long>(0, numOfLaps + 1).ToArray();
+        LapTime = Enumerable.Repeat<MilliSecond>(0, numOfLaps + 1).ToArray();
         TaskCharIDs = new ushort[assignmentLength];
-        CorrectKeyTime = Enumerable.Repeat<long>(0, assignmentLength + 1).ToArray();
+        CorrectKeyTime = Enumerable.Repeat<MilliSecond>(0, assignmentLength + 1).ToArray();
     }
     /// <summary>
     /// ゲーム開始時はこれを使う。キーバインドが既に判明しているため
@@ -134,28 +173,7 @@ public class TrialData
     {
         // ディレクトリパスの生成
         string saveDataDirPath = Application.dataPath + "/SaveData";
-        string logDirPath;
-        switch (GameMode)
-        {
-            // MODE:NONSENSE
-            case 0:
-                logDirPath = saveDataDirPath + "/Nonsense";
-                break;
-            default:
-                logDirPath = saveDataDirPath + "/Nonsense";
-                break;
-        }
-        switch (IsTerminated)
-        {
-            case false:
-                logDirPath += "/Completed";
-                break;
-            case true:
-                logDirPath += "/Terminated";
-                break;
-        }
-        if (!Directory.Exists(logDirPath))
-            Directory.CreateDirectory(logDirPath);
+        string logDirPath = LogFileUtil.GetLogDirPath(GameMode, IsTerminated, false);
 
         // ファイルパス接頭辞の生成
         string filePath = logDirPath;
@@ -185,15 +203,23 @@ public class TrialData
         {
             using (StreamWriter sw = File.CreateText(filePath))
             {
+                // MilliSecond[] をそのまま Join できないため、一旦 long[] へと変換
+                long[] _lapTime = new long[LapTime.Length];
+                for (int i = 0; i < LapTime.Length; i++)
+                    _lapTime[i] = LapTime[i];
+                long[] _correctKeyTime = new long[CorrectKeyTime.Length];
+                for (int i = 0; i < CorrectKeyTime.Length; i++)
+                    _correctKeyTime[i] = CorrectKeyTime[i];
+
                 sw.WriteLine(LogVersion.ToString());
                 sw.WriteLine(string.Join(",", new int[] { GameMode, CharMode, Platform }));
                 sw.WriteLine(DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff"));
                 sw.WriteLine((IsTerminated ? "1," : "0,") + TypedKeys.ToString());
                 sw.WriteLine(string.Join(",", new long[] { TotalTime, TotalMiss }));
-                sw.WriteLine(string.Join(",", LapTime));
+                sw.WriteLine(string.Join(",", _lapTime));
                 sw.WriteLine(IsProtected ? "1" : "0");
                 sw.WriteLine(string.Join(",", TaskCharIDs));
-                sw.WriteLine(string.Join(",", CorrectKeyTime));
+                sw.WriteLine(string.Join(",", _correctKeyTime));
                 sw.WriteLine(string.Join(",", AllInputIDs));
                 sw.WriteLine(string.Join(",", AllInputTime));
                 sw.WriteLine(string.Join(",", TrialKeyBind.RawKeyMap));
@@ -439,7 +465,6 @@ public class Config
     }
 }
 
-[System.Obsolete("When implementing UtilKeyBinding, changes needed.")]
 public class KeyBindDicts
 {
     // KeyID と CharID（Key にアサインされた文字）間の変換

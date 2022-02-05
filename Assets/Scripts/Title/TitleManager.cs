@@ -49,6 +49,10 @@ public class TitleManager : MonoBehaviour
     {
         MySceneManager.ChangeSceneRequest("GameMainScene");
     }
+    public void HandlerResultsButtonClick()
+    {
+        MySceneManager.ChangeSceneRequest("ResultsScene");
+    }
     public void OnJumpToWebsiteButtonClick()
     {
         JumpToWebsite();
@@ -58,7 +62,6 @@ public class TitleManager : MonoBehaviour
         Debug.Log("Bye...");
         ExitGame();
     }
-    [System.Obsolete("バインド機能つけたら、文字の判別方法を変更要")]
     public void OnNormalKeyDown(ushort charID)
     {
         if (charID == 14) OnGameMainStartButtonClick(); // T

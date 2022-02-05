@@ -86,7 +86,7 @@ public class TweeterManager : MonoBehaviour
     void GenerateTweet()
     {
         copyButtonTMP.GetComponent<TextMeshProUGUI>().text = "Copy to\nClipboard [C]";
-        System.Tuple<string, TrialData> tup = gameMainManager.GetComponent<GameMainManager>().GetTrialData();
+        System.Tuple<string, TrialData> tup = gameMainManager.GetComponent<TrialSubManager>().GetTrialData();
         string gstate = tup.Item1;
         TrialData nowTrialData = tup.Item2;
         if (nowTrialData == null)
@@ -154,7 +154,6 @@ public class TweeterManager : MonoBehaviour
     public void OnJumpToWebsiteButtonClick() {
         JumpToWebsite();
     }
-    [System.Obsolete("ショートカットバインド機能つけたら、文字の判別方法を変更要")]
     public void OnNormalKeyDown(ushort charID)
     {
         if (charID == 7) OnGenerateTweetButtonClick();

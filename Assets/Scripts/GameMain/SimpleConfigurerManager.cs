@@ -6,7 +6,22 @@ using TMPro;
 
 public class SimpleConfigurerManager : MonoBehaviour
 {
+    // ゲームモード変数
+    public int GameMode;
+    
+    // 自分が管理するオブジェクト
     public GameObject missLimitInput;
+
+    int missLimit;
+    int defaultMissLimit;
+    int maxMissLimit;
+
+    void Awake()
+    {
+        // 定数の読み込み
+        defaultMissLimit = GlobalConsts.DefaultMissLimit[GameMode];
+        maxMissLimit = GlobalConsts.MaxMissLimit[GameMode];
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -19,18 +34,27 @@ public class SimpleConfigurerManager : MonoBehaviour
     {
         
     }
-    public void onMissLimitEndEdit()
+    void SetMissLimitTMP(int misslim)
     {
-        int misslim;
-        if (missLimitInput.GetComponent<TMP_InputField>().text == null) misslim = 50;
+        missLimitInput.GetComponent<TMP_InputField>().text = misslim.ToString();
+    }
+    string GetMissLimitTMP()
+    {
+        return missLimitInput.GetComponent<TMP_InputField>().text;
+    }
+    public void OnMissLimitEndEdit()
+    {
+        if (GetMissLimitTMP() == null)
+            missLimit = defaultMissLimit;
         else
         {
-            misslim = int.Parse(missLimitInput.GetComponent<TMP_InputField>().text);
+            missLimit = int.Parse(GetMissLimitTMP());
         }
-        if (misslim > 360) misslim = 360;
-        else if (misslim < 0) misslim = 0;
+        if (missLimit > maxMissLimit) missLimit = maxMissLimit;
+        else if (missLimit < 0) missLimit = 0;
 
-        missLimitInput.GetComponent<TMP_InputField>().text = misslim.ToString();
-        PlayerPrefs.SetInt("MissLimit", misslim);
+        SetMissLimitTMP(missLimit);
+        PlayerPrefs.SetInt("MissLimit", missLimit);
     }
+
 }
