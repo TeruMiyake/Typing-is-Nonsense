@@ -290,7 +290,7 @@ public class TrialSubManager : MonoBehaviour
         nowTrialData.DateTimeWhenFinished = System.DateTime.Now;
 
         // データの保存
-        nowTrialData.SaveLog();
+        nowTrialData.SaveToLogFile();
 
         // トライアル情報の描画（トライアル中と計測の仕方が違うため、終了処理後に呼び出し）
         UpdateTrialInfo();
@@ -318,7 +318,7 @@ public class TrialSubManager : MonoBehaviour
         // ゲーム(完了|キャンセル)後であった場合、最後にキーを打鍵した時間を使って計算
         else totalTime = nowTrialData.TotalTime;
         int keys = nowTrialData.TypedKeys;
-        double cps = (double)(keys * 1000) / totalTime;
+        double cps = totalTime.ToCPS(keys);
 
         // トータルタイムの表示
         trialObjectController.SetTotalTime(totalTime);

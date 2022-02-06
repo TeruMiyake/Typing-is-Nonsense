@@ -49,7 +49,7 @@ public class TitleManager : MonoBehaviour
     {
         MySceneManager.ChangeSceneRequest("GameMainScene");
     }
-    public void HandlerResultsButtonClick()
+    public void ResultsButtonClickHandler()
     {
         MySceneManager.ChangeSceneRequest("ResultsScene");
     }
@@ -64,8 +64,9 @@ public class TitleManager : MonoBehaviour
     }
     public void OnNormalKeyDown(ushort charID)
     {
-        if (charID == 14) OnGameMainStartButtonClick(); // T
+        if (charID == 14) OnGameMainStartButtonClick(); // N
         if (charID == 5) OnKeybindingStartButtonClick(); // E
+        if (charID == 18) ResultsButtonClickHandler(); // R
         if (charID == 10) OnJumpToWebsiteButtonClick(); // J
     }
 }

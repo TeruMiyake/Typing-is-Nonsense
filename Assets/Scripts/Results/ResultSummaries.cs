@@ -16,6 +16,7 @@ public class ResultSummaries
     public List<ResultSummary> summaryList = new List<ResultSummary>();
 
     string logDirPath;
+    string rankingTxtPath;
 
     // ranking?.txt と ログファイルの有無は一致しないので管理する
     HashSet<string> fileNameSetInRankingTxt = new HashSet<string>();
@@ -27,16 +28,19 @@ public class ResultSummaries
         gameMode = _gameMode;
         numOfLaps = GlobalConsts.NumOfLaps[gameMode];
         logDirPath = LogFileUtil.GetLogDirPath(gameMode, isTerminated, isGuestResult);
+        logDirPath += "/";
+        rankingTxtPath = logDirPath + "ranking" + gameMode.ToString() + ".txt";
 
         // ResultSummary の読み込みと、ファイル名の集合の管理
         // isTerminated の場合、ranking?.txt は無い
         if (!isTerminated)
         {
-            // 1. ranking?.txt 
+            // 1. get summaries from ranking?.txt 
             LoadFromRankingTxt();
 
-            // 2. log directory
+            // 2. get summaries from log directory
             // ここで、ranking?.txt 内になかった記録なら、summaryList に追加
+            // そのうち、ファイル読込部分をメソッドとして切り出したい
             string[] fileNames = LogFileUtil.GetLogFileNameList(gameMode, isTerminated, isGuestResult);
             foreach(string fileName in fileNames)
             {
@@ -57,6 +61,9 @@ public class ResultSummaries
             {
                 summaryList[i - 1].Rank = i;
             }
+
+            // 3. 保存処理
+            SaveToRankingTxt();
         }
 
     }
@@ -101,7 +108,6 @@ public class ResultSummaries
     /// </summary>
     void LoadFromRankingTxt()
     {
-        string rankingTxtPath = logDirPath + "/ranking" + gameMode.ToString() + ".txt";
         if (File.Exists(rankingTxtPath))
         {
             using (StreamReader reader = new StreamReader(rankingTxtPath))
@@ -145,6 +151,18 @@ public class ResultSummaries
             // 今のところ何もすることを思いつかない
         }
     }
+    /// <summary>
+    /// summaryList を ranking?txt へと書き込む
+    /// 行ごとの形式は rank, time, miss, lap[num], datetime, filename, bool, bool, bool
+    /// </summary>
+    void SaveToRankingTxt()
+    {
+        using (StreamWriter sw = new StreamWriter(rankingTxtPath, false))
+        foreach (ResultSummary summary in summaryList)
+        {
+                sw.WriteLine(summary.ToStringForRankingTxt());
+        }
+    }
 }
 
 
@@ -173,8 +191,10 @@ public class ResultSummary
         int numOfLaps = GlobalConsts.NumOfLaps[gameMode];
         if (File.Exists(filePath))
         {
+            FilePath = filePath;
             // ファイルが存在する = ログがある
             HasLog = true;
+
 
             using (StreamReader reader = new StreamReader(filePath))
             {
@@ -202,5 +222,35 @@ public class ResultSummary
                 IsProtected = line7 == "1" ? true : false;
             }
         }
+        else
+        {
+            Debug.Log("There's no such log file.");
+        }
+    }
+    /// <summary>
+    /// ranking?.txt 用の行を返す
+    /// </summary>
+    /// <returns></returns>
+    public string ToStringForRankingTxt()
+    {
+        int numOfLaps = LapTime.Length;
+
+        string[] strarr = new string[8 + LapTime.Length];
+
+        strarr[0] = Rank.ToString();
+        strarr[1] = TotalTime;
+        strarr[2] = TotalMiss.ToString();
+        for (int i = 0;i < LapTime.Length; i++)
+        {
+            strarr[3 + i] = LapTime[i];
+        }
+        strarr[LapTime.Length + 3] = DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff");
+        strarr[LapTime.Length + 4] = Path.GetFileName(FilePath);
+        strarr[LapTime.Length + 5] = IsProtected ? "1" : "0";
+        strarr[LapTime.Length + 6] = HasLog ? "1" : "0";
+        strarr[LapTime.Length + 7] = HasRegistrationCode ? "1" : "0";
+
+        string res = string.Join(",", strarr);
+        return res;
     }
 }

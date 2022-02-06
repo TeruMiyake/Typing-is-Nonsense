@@ -14,6 +14,10 @@ public class ResultsListObjectController : MonoBehaviour
     // 上司
     ResultsManager resultsManager;
 
+    // 連携先
+    // 表示した ResultSummary.prefab に ResultDetailSubManager.ResultSummaryClickedHandler() を取り付ける必要があるため、読み込む
+    ResultDetailSubManager resultDetailSubManager;
+
     // ResultsList を表示するための場所
     public GameObject resultsListContent;
 
@@ -36,6 +40,9 @@ public class ResultsListObjectController : MonoBehaviour
     {
         // 上司を見つける
         resultsManager = GetComponent<ResultsManager>();
+
+        // 連携先を見つける
+        resultDetailSubManager = GetComponent<ResultDetailSubManager>();
     }
 
     // Start is called before the first frame update
@@ -75,6 +82,15 @@ public class ResultsListObjectController : MonoBehaviour
         {
             DisplayResultSummary(i, summaries.summaryList[i]);
         }
+
+        // クリックされた場合のイベントハンドラの取り付け
+        for (int i = 0; i < numOfResults; i++)
+        {
+            Button prefabButton = resultSummaryObjects[i].GetComponent<Button>();
+            string filePath = summaries.summaryList[i].FilePath;
+            prefabButton.onClick.AddListener(() => resultDetailSubManager.ResultSummaryClickedHandler(filePath));
+        }
+
     }
     public void DisplayResultSummary(int idx, ResultSummary summary)
     {

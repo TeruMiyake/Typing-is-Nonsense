@@ -155,6 +155,9 @@ public class TrialObjectController : MonoBehaviour
             assignedCharTMPs[i].GetComponent<RectTransform>().localPosition = new Vector3(displayInitX + displayCharXDiff * (i % lapLength), displayInitY + displayCharYDiff * (i / lapLength), 0);
         }
     }
+
+    // ここから先、ResultDetailObjectController と内容一緒
+
     /// <summary>
     /// SubManager が nowTrialData を生成したあと、課題文字を表示するためのもの
     /// </summary>
@@ -188,7 +191,7 @@ public class TrialObjectController : MonoBehaviour
     /// <summary>
     /// 終了していないラップの場合は 0 を渡す（空白を表示）
     /// </summary>
-    /// <param name="lap"></param>
+    /// <param name="lap">1-indexed</param>
     /// <param name="lapTime"></param>
     public void SetLapTime(int lap, MilliSecond lapTime)
     {
