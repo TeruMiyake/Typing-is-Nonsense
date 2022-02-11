@@ -47,14 +47,24 @@ public class MilliSecond : System.IEquatable<MilliSecond>, System.IComparable<Mi
         return (ms / 1000).ToString() + "." + (ms % 1000).ToString("000");
     }
     /// <summary>
-    /// MilliSecond の値を「keys キーの打鍵に要した時間」と捉えたときの double CPS を返す
+    /// MilliSecond の値を「chars 文字の打鍵に要した時間」と捉えたときの double CPS を返す
     /// </summary>
-    /// <param name="keys">MilliSecond ms の間に打ったキーの数</param>
+    /// <param name="keys">MilliSecond ms の間に打った文字の数</param>
     /// <returns></returns>
-    public double ToCPS(int keys)
+    public double ToCPS(int chars)
     {
-        double cps = (double)(keys * 1000) / ms;
+        double cps = (double)(chars * 1000) / ms;
         return cps;
+    }
+    /// <summary>
+    /// MilliSecond の値を「chars 文字の打鍵に要した時間」と捉えたときの double SPC を返す
+    /// </summary>
+    /// <param name="keys">MilliSecond ms の間に打った文字の数</param>
+    /// <returns></returns>
+    public double ToSPC(int chars)
+    {
+        double spc = (double)ms / 1000 / chars;
+        return spc;
     }
 
     // インタフェース

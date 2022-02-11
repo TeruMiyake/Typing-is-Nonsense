@@ -5,8 +5,6 @@ using TMPro;
 
 public class ResultDetailObjectController : MonoBehaviour
 {
-    public GameObject TestTMP;
-
     TrialData trialData;
     KeyBindDicts dicts;
 
@@ -25,13 +23,13 @@ public class ResultDetailObjectController : MonoBehaviour
     // 課題文字の左上座標
     // アンカーは (0, 1) つまり 親オブジェクト Assignment の左上からの相対距離で指定
     // Trial とは異なるため GlobalConsts で設定しない
-    int displayInitX = 12;
-    int displayInitY = -10;
+    int displayInitX = 2;
+    int displayInitY = 0;
 
     // 課題文字の Text Mesh Pro 表示をいくつずつズラすか
     // Trial とは異なるため GlobalConsts で設定しない
-    int displayCharXDiff = 14;
-    int displayCharYDiff = -30;
+    int displayCharXDiff = 15;
+    int displayCharYDiff = -27;
 
     // TrialData に渡すゲームモード変数と、それが示す意味
     int assignmentLength;
@@ -79,6 +77,7 @@ public class ResultDetailObjectController : MonoBehaviour
         {
             SetLapTime(i, trialData.GetSingleLapTime(i));
         }
+        Debug.Log("ShowResultDetail completed.");
     }
     public void InitializeAllDisplay()
     {
@@ -157,8 +156,10 @@ public class ResultDetailObjectController : MonoBehaviour
     /// <param name="lapTime"></param>
     public void SetLapTime(int lap, MilliSecond lapTime)
     {
+        Debug.Log("started setlaptime()");
         string str = (lapTime == 0) ? "" : lapTime.ToFormattedTime();
         LapTimeTMP[lap - 1].GetComponent<TextMeshProUGUI>().text = str;
+        Debug.Log("completed setlaptime()");
     }
     /// <summary>
     /// 終了していないラップの場合は 0 を渡す（空白を表示）

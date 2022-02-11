@@ -8,6 +8,7 @@ public class ResultDetailSubManager : MonoBehaviour
 
     // 部下
     ResultDetailObjectController resultDetailObjectController;
+    ResultChartsSubManager resultChartsSubManager;
 
     public GameObject ResultDetail;
     public GameObject ResultsList;
@@ -18,11 +19,16 @@ public class ResultDetailSubManager : MonoBehaviour
     void Awake()
     {
         resultDetailObjectController = GetComponent<ResultDetailObjectController>();
+
+        // 部下を見つける
+        resultChartsSubManager = GetComponent<ResultChartsSubManager>();
     }
     // Start is called before the first frame update
     void Start()
     {
         DeactivateResultDetail();
+
+        resultChartsSubManager.InitializeCharts();
     }
 
     // Update is called once per frame
@@ -86,6 +92,7 @@ public class ResultDetailSubManager : MonoBehaviour
         trialData = new TrialData(filePath);
         resultDetailObjectController.ShowResultDetail(trialData);
 
+        resultChartsSubManager.ShowResultChart(trialData);
     }
 
 }

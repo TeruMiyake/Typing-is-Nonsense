@@ -34,7 +34,6 @@ public class ResultsListSubManager : MonoBehaviour
         resultSummaries = new ResultSummaries(gameMode, isTerminated, isGuestResult);
 
         resultsListObjectController.DisplayResultSummaries(resultSummaries);
-        Debug.Log("Completed!");
     }
 
     // Update is called once per frame
