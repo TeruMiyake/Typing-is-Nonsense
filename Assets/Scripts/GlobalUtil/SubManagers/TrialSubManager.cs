@@ -289,8 +289,12 @@ public class TrialSubManager : MonoBehaviour
         // nowTrialData の設定
         nowTrialData.DateTimeWhenFinished = System.DateTime.Now;
 
-        // データの保存
+        // ログファイルの保存
         nowTrialData.SaveToLogFile();
+
+        // 打ち切りなら登録コードの保存
+        if (gameManager.GetGameState() == GameState.Completed)
+            nowTrialData.SaveToRegistCodeFile();
 
         // トライアル情報の描画（トライアル中と計測の仕方が違うため、終了処理後に呼び出し）
         UpdateTrialInfo();

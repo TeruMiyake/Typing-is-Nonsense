@@ -21,6 +21,7 @@ public class ResultSummaries
     // ranking?.txt と ログファイルの有無は一致しないので管理する
     HashSet<string> fileNameSetInRankingTxt = new HashSet<string>();
     HashSet<string> fileNameSetInLogDir = new HashSet<string>();
+    HashSet<string> fileNameSetInRegistCodeDir = new HashSet<string>();
 
     public ResultSummaries(int _gameMode, bool isTerminated, bool isGuestResult)
     {
@@ -48,6 +49,31 @@ public class ResultSummaries
                 if (!fileNameSetInRankingTxt.Contains(fileName))
                 {
                     summaryList.Add(new ResultSummary(gameMode, logDirPath + "/" + fileName));
+                }
+            }
+
+            // 3. check if each summary has *.rcode
+            string[] registCodeFileNames = LogFileUtil.GetRegistCodeFileNameList(gameMode);
+            foreach (string registCodeFileName in registCodeFileNames)
+            {
+                fileNameSetInRegistCodeDir.Add(registCodeFileName);
+            }
+            foreach (ResultSummary summary in summaryList)
+            {
+                string fileNameIfExisted = summary.DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff") + ".rcode";
+                switch (gameMode)
+                {
+                    // Nonsense
+                    case 0:
+                        fileNameIfExisted = "NC" + fileNameIfExisted;
+                        break;
+                    default:
+                        fileNameIfExisted = "NC" + fileNameIfExisted;
+                        break;
+                }
+                if (fileNameSetInRegistCodeDir.Contains(fileNameIfExisted))
+                {
+                    summary.HasRegistrationCode = true;
                 }
             }
 
@@ -192,9 +218,8 @@ public class ResultSummary
         if (File.Exists(filePath))
         {
             FilePath = filePath;
-            // ファイルが存在する = ログがある
+            // ファイルが存在する = ログがあるので HasLog = true とする
             HasLog = true;
-
 
             using (StreamReader reader = new StreamReader(filePath))
             {

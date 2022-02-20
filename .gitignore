@@ -1,4 +1,5 @@
-/[Aa]ssets/SaveData/*
+/[Aa]ssets/SaveData/
+/[Aa]ssets/Scripts/GlobalUtil/RegistCode/
 /[Aa]ssets/Icons/
 
 # Below this line was auto-generated 

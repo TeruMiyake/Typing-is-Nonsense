@@ -126,10 +126,13 @@ public class TrialData
         LoadFromLogFile(filePath);
     }
 
+    /// <summary>
+    /// BOM 無し UTF-8 エンコードで、適切なフォルダの *.log へ保存する。
+    /// コード内でエンコードの指定はしていないが、File.CreateText(filePath) で生成される StreamWriter は必ず UTF-8 エンコード。
+    /// </summary>
     public void SaveToLogFile()
     {
         // ディレクトリパスの生成
-        string saveDataDirPath = Application.dataPath + "/SaveData";
         string logDirPath = LogFileUtil.GetLogDirPath(GameMode, IsTerminated, false);
 
         // ファイルパス接頭辞の生成
@@ -141,7 +144,7 @@ public class TrialData
                 filePath += "/N";
                 break;
             default:
-                logDirPath = saveDataDirPath + "/N";
+                filePath +=  "/N";
                 break;
         }
         switch (IsTerminated)
@@ -160,33 +163,83 @@ public class TrialData
         {
             using (StreamWriter sw = File.CreateText(filePath))
             {
-                // MilliSecond[] をそのまま Join できないため、一旦 long[] へと変換
-                long[] _lapTime = new long[LapTime.Length];
-                for (int i = 0; i < LapTime.Length; i++)
-                    _lapTime[i] = LapTime[i];
-                long[] _correctKeyTime = new long[CorrectKeyTime.Length];
-                for (int i = 0; i < CorrectKeyTime.Length; i++)
-                    _correctKeyTime[i] = CorrectKeyTime[i];
-
-                sw.WriteLine(LogVersion.ToString());
-                sw.WriteLine(string.Join(",", new int[] { GameMode, CharMode, Platform }));
-                sw.WriteLine(DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff"));
-                sw.WriteLine((IsTerminated ? "1," : "0,") + TypedKeys.ToString());
-                sw.WriteLine(string.Join(",", new long[] { TotalTime, TotalMiss }));
-                sw.WriteLine(string.Join(",", _lapTime));
-                sw.WriteLine(IsProtected ? "1" : "0");
-                sw.WriteLine(string.Join(",", TaskCharIDs));
-                sw.WriteLine(string.Join(",", _correctKeyTime));
-                sw.WriteLine(string.Join(",", AllInputIDs));
-                sw.WriteLine(string.Join(",", AllInputTime));
-                sw.WriteLine(string.Join(",", TrialKeyBind.RawKeyMap));
-                sw.WriteLine(string.Join(",", TrialKeyBind.NullKeyMap));
-                sw.WriteLine(string.Join("", TrialKeyBind.CharMap));
+                string trialLogString = GenerateTrialLogString();
+                sw.Write(trialLogString);
             }
         }
         else Debug.Log("A log file of the same name already exists.");
     }
     /// <summary>
+    /// Registration Code の保存。生成は RegistCodeGenerator が行う。
+    /// </summary>
+    public void SaveToRegistCodeFile()
+    {
+        RegistCodeGenerator generator = new RegistCodeGenerator();
+        string registCode = generator.GenerateRegistrationCode(this);
+
+        // ディレクトリパスの取得 & ファイルパス接頭辞の生成
+        string filePath = LogFileUtil.GetRegistCodeDirPath(GameMode);
+        switch (GameMode)
+        {
+            // MODE:NONSENSE
+            case 0:
+                filePath += "/N";
+                break;
+            default:
+                filePath = filePath + "/N";
+                break;
+        }
+        filePath += "C";
+
+        // ファイルパス本体の生成
+        filePath += DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff") + ".rcode";
+
+        // 書き込み
+        if (!File.Exists(filePath))
+        {
+            using (StreamWriter sw = File.CreateText(filePath))
+            {
+                sw.Write(registCode);
+            }
+        }
+        else Debug.Log("A Registration Code file of the same name already exists.");
+    }
+    /// <summary>
+    /// </summary>
+    /// <returns>*.log に保存すべき string</returns>
+    public string GenerateTrialLogString()
+    {
+        // MilliSecond[] をそのまま Join できないため、一旦 long[] へと変換
+        long[] _lapTime = new long[LapTime.Length];
+        for (int i = 0; i < LapTime.Length; i++)
+            _lapTime[i] = LapTime[i];
+        long[] _correctKeyTime = new long[CorrectKeyTime.Length];
+        for (int i = 0; i < CorrectKeyTime.Length; i++)
+            _correctKeyTime[i] = CorrectKeyTime[i];
+
+        List<string> lines = new List<string>();
+        lines.Add(LogVersion.ToString());
+        lines.Add(string.Join(",", new int[] { GameMode, CharMode, Platform }));
+        lines.Add(DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff"));
+        lines.Add((IsTerminated ? "1," : "0,") + TypedKeys.ToString());
+        lines.Add(string.Join(",", new long[] { TotalTime, TotalMiss }));
+        lines.Add(string.Join(",", _lapTime));
+        lines.Add(IsProtected ? "1" : "0");
+        lines.Add(string.Join(",", TaskCharIDs));
+        lines.Add(string.Join(",", _correctKeyTime));
+        lines.Add(string.Join(",", AllInputIDs));
+        lines.Add(string.Join(",", AllInputTime));
+        lines.Add(string.Join(",", TrialKeyBind.RawKeyMap));
+        lines.Add(string.Join(",", TrialKeyBind.NullKeyMap));
+        lines.Add(string.Join("", TrialKeyBind.CharMap));
+
+        string trialLogString = string.Join("\n", lines);
+        return trialLogString;
+    }
+    /// <summary>
+    /// *.log ファイルを「文字コードを指定せず」読み込む。
+    /// 文字コードを指定しない StreamReader は BOM が無ければ UTF-8 として処理し、BOM があれば所定のエンコードで処理する。
+    /// （ユーザがファイルをエディタなどで開いたあと、異なる文字コードで保存してしまった場合などに備えての仕様。）
     /// GameMode など全てファイルから読み込み
     /// MissLimit はいじらない（デフォルトのまま）
     /// LapMiss は計算すれば出せるが、時間がかかるので未実装
