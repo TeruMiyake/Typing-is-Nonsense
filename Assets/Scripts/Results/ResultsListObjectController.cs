@@ -119,14 +119,25 @@ public class ResultsListObjectController : MonoBehaviour
         {
             lapTimeTMPs[i].text = summary.LapTime[i].ToFormattedTime();
         }
-        dateTimeTMP.text = summary.DateTimeWhenFinished.ToString("yyyy/MM/dd") + "\n" + summary.DateTimeWhenFinished.ToString("HH:mm:ss");
+        dateTimeTMP.text = summary.DateTimeWhenFinishedUtc.ToLocalTime().ToString("yyyy/MM/dd") + "\n" + summary.DateTimeWhenFinishedUtc.ToLocalTime().ToString("HH:mm:ssz");
 
-        // トグルアイコンの描画
+        // アイコンオブジェクトの取得
+        // Toggle : LogfileProtection
         Toggle protectionToggle = summaryObj.transform.Find("ProtectionToggle").GetComponent<Toggle>();
+        // ログファイルを保持しているか否か
+        // 本来トグルにする必要はなかったかもしれない
         Toggle logToggle = summaryObj.transform.Find("LogToggle").GetComponent<Toggle>();
-        Toggle keyToggle = summaryObj.transform.Find("KeyToggle").GetComponent<Toggle>();
+        Button registCodeButton = summaryObj.transform.Find("RegistCodeButton").GetComponent<Button>();
+
+        // アイコン状態の初期設定
         protectionToggle.isOn = summary.IsProtected;
         logToggle.isOn = summary.HasLog;
-        keyToggle.isOn = summary.HasRegistrationCode;
+        registCodeButton.interactable = summary.HasRegistrationCode;
+        if (summary.HasRegistrationCode)
+        {
+            string registCodePath = summary.FilePath.Replace("Completed", "RegistrationCode").Replace(".log", ".rcode");
+            registCodeButton.onClick.AddListener(() => RegistCodeCopier.RegistCodeButtonClickedHandler(registCodePath));
+            registCodeButton.onClick.AddListener(() => MessageController.Instance.ShowMessage("Copied to Clipboard."));
+        }
     }
 }

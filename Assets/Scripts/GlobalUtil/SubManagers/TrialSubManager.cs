@@ -287,7 +287,7 @@ public class TrialSubManager : MonoBehaviour
     void OnEndTrial()
     {
         // nowTrialData の設定
-        nowTrialData.DateTimeWhenFinished = System.DateTime.Now;
+        nowTrialData.DateTimeWhenFinishedUtc = System.DateTimeOffset.UtcNow;
 
         // ログファイルの保存
         nowTrialData.SaveToLogFile();

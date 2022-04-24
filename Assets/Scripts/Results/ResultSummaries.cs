@@ -60,7 +60,7 @@ public class ResultSummaries
             }
             foreach (ResultSummary summary in summaryList)
             {
-                string fileNameIfExisted = summary.DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff") + ".rcode";
+                string fileNameIfExisted = summary.DateTimeWhenFinishedUtc.ToString("yyyyMMddHHmmssfff") + ".rcode";
                 switch (gameMode)
                 {
                     // Nonsense
@@ -120,11 +120,11 @@ public class ResultSummaries
     }
     public void SortByDateTimeAscending()
     {
-        summaryList = new List<ResultSummary>(summaryList.OrderBy(x => x.DateTimeWhenFinished));
+        summaryList = new List<ResultSummary>(summaryList.OrderBy(x => x.DateTimeWhenFinishedUtc));
     }
     public void SortByDateTimeDescending()
     {
-        summaryList = new List<ResultSummary>(summaryList.OrderByDescending(x => x.DateTimeWhenFinished));
+        summaryList = new List<ResultSummary>(summaryList.OrderByDescending(x => x.DateTimeWhenFinishedUtc));
     }
 
     /// <summary>
@@ -153,7 +153,8 @@ public class ResultSummaries
                     {
                         summary.LapTime[i] = new MilliSecond(long.Parse(data[3 + i]));
                     }
-                    summary.DateTimeWhenFinished = System.DateTime.ParseExact(data[2 + numOfLaps + 1], "yyyyMMddHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
+                    string datetimeString_Utc = data[2 + numOfLaps + 1] + "Z";
+                    summary.DateTimeWhenFinishedUtc = System.DateTimeOffset.ParseExact(datetimeString_Utc, "yyyyMMddHHmmssfffZ", System.Globalization.CultureInfo.InvariantCulture);
 
                     // ファイル名はセットで管理
                     string fileName = data[2 + numOfLaps + 2];
@@ -198,7 +199,7 @@ public class ResultSummary
     public MilliSecond TotalTime;
     public int TotalMiss;
     public MilliSecond[] LapTime;
-    public System.DateTime DateTimeWhenFinished;
+    public System.DateTimeOffset DateTimeWhenFinishedUtc;
     public string FilePath;
 
     public bool IsProtected = false;
@@ -226,7 +227,7 @@ public class ResultSummary
                 string line1 = reader.ReadLine(); // 無視
                 string line2 = reader.ReadLine(); // 無視
                 string line3 = reader.ReadLine();
-                DateTimeWhenFinished = System.DateTime.ParseExact(line3, "yyyyMMddHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
+                DateTimeWhenFinishedUtc = System.DateTimeOffset.ParseExact(line3 + "Z", "yyyyMMddHHmmssfffZ", System.Globalization.CultureInfo.InvariantCulture);
                 string line4 = reader.ReadLine(); // 無視
 
                 string line5 = reader.ReadLine();
@@ -269,7 +270,7 @@ public class ResultSummary
         {
             strarr[3 + i] = LapTime[i];
         }
-        strarr[LapTime.Length + 3] = DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff");
+        strarr[LapTime.Length + 3] = DateTimeWhenFinishedUtc.ToString("yyyyMMddHHmmssfff");
         strarr[LapTime.Length + 4] = Path.GetFileName(FilePath);
         strarr[LapTime.Length + 5] = IsProtected ? "1" : "0";
         strarr[LapTime.Length + 6] = HasLog ? "1" : "0";

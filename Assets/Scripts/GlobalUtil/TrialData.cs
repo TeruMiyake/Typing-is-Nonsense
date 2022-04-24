@@ -29,7 +29,7 @@ public class TrialData
     public int Platform = 0; // 0:Win
     // line 3
     // 終了時刻は厳密でなくて良い。普段は MinValue にしておき、SaveLog() 時のみ計測
-    public System.DateTime DateTimeWhenFinished = System.DateTime.MinValue;
+    public System.DateTimeOffset DateTimeWhenFinishedUtc = System.DateTimeOffset.MinValue;
     // line 4
     public bool IsTerminated = true; // 0:completed, 1:terminated
     public int TypedKeys = 0; // GameMain.OnCorrectKeyDown() で更新
@@ -158,7 +158,8 @@ public class TrialData
         }
 
         // ファイルパス本体の生成
-        filePath += DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff") + ".log";
+        // ファイル名は UTC で保存する
+        filePath += DateTimeWhenFinishedUtc.ToString("yyyyMMddHHmmssfff") + ".log";
         if (!File.Exists(filePath))
         {
             using (StreamWriter sw = File.CreateText(filePath))
@@ -192,7 +193,8 @@ public class TrialData
         filePath += "C";
 
         // ファイルパス本体の生成
-        filePath += DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff") + ".rcode";
+        // ファイル名は UTC で保存する
+        filePath += DateTimeWhenFinishedUtc.ToString("yyyyMMddHHmmssfff") + ".rcode";
 
         // 書き込み
         if (!File.Exists(filePath))
@@ -220,7 +222,8 @@ public class TrialData
         List<string> lines = new List<string>();
         lines.Add(LogVersion.ToString());
         lines.Add(string.Join(",", new int[] { GameMode, CharMode, Platform }));
-        lines.Add(DateTimeWhenFinished.ToString("yyyyMMddHHmmssfff"));
+        // *.log には LocalTime ではなく UTC で保存
+        lines.Add(DateTimeWhenFinishedUtc.ToString("yyyyMMddHHmmssfff"));
         lines.Add((IsTerminated ? "1," : "0,") + TypedKeys.ToString());
         lines.Add(string.Join(",", new long[] { TotalTime, TotalMiss }));
         lines.Add(string.Join(",", _lapTime));
@@ -266,7 +269,9 @@ public class TrialData
             Platform = line2intarr[2]; // 0:Win
             // line 3
             // 終了時刻は厳密でなくて良い。普段は MinValue にしておき、SaveLog() 時のみ計測
-            DateTimeWhenFinished = System.DateTime.ParseExact(lines[2], "yyyyMMddHHmmssfff", System.Globalization.CultureInfo.InvariantCulture);
+            // 保存された文字列を UTC であるとみなして読み込む
+            string datetimeString_Utc = lines[2] + "Z";
+            DateTimeWhenFinishedUtc = System.DateTimeOffset.ParseExact(datetimeString_Utc, "yyyyMMddHHmmssfffZ", System.Globalization.CultureInfo.InvariantCulture);
             // line 4
             int[] line4intarr = lines[3].Split(',').Select(x => int.Parse(x)).ToArray();
             IsTerminated = line4intarr[0] == 1 ? true : false; // 0:completed, 1:terminated
