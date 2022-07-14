@@ -21,6 +21,7 @@ public class MessageController : MonoBehaviour
         }
     }
 
+    // Usability 何？ 多分使ってない気がする……
     public GameObject Usability;
     public GameObject MessagePrefab;
 

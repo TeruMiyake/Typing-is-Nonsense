@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,8 +23,6 @@ public class ResultsListObjectController : MonoBehaviour
     // ResultSummary
     GameObject[] resultSummaryObjects;
     public GameObject ResultSummaryPrefab; // set from inspector
-
-    int numOfResults;
 
     // 表示位置定数
     // アンカーは (0, 1) つまり 親オブジェクト Content の左上からの相対距離で指定
@@ -56,7 +53,24 @@ public class ResultsListObjectController : MonoBehaviour
     {
         
     }
-    public void DisplayResultSummaries(ResultSummaries summaries)
+    /// <summary>
+    /// リザルト数に合わせて PagerDropdown の Options の数を調整する
+    /// </summary>
+    public void FitPagerDropDownToNumOfResults(ResultSummaries summaries)
+    {
+        int numOfResults = summaries.NumOfResults;
+        var dropdown = GameObject.Find("PagerDropdown").GetComponent<TMP_Dropdown>();
+        dropdown.ClearOptions();
+        // 必要な Options の数を計算
+        // ceil(a / b) == (a + b - 1) / b
+        int numOfOptions = Math.Max(1, (numOfResults + 100 - 1) / 100);
+        // Options 生成
+        for (int i = 0; i < numOfOptions; i++)
+        {
+            dropdown.options.Add(new TMP_Dropdown.OptionData { text = $"{i + 1} / {numOfOptions}" });
+        }
+    }
+    public void DisplayResultSummaries(ResultSummaries summaries, int pageNumberToShow)
     {
         gameMode = resultsManager.GetGameMode();
         numOfLaps = GlobalConsts.NumOfLaps[gameMode];
@@ -66,9 +80,13 @@ public class ResultsListObjectController : MonoBehaviour
             foreach (GameObject summaryObj in resultSummaryObjects) Destroy(summaryObj);
 
         // オブジェクト用意
-        numOfResults = summaries.NumOfResults;
-        resultSummaryObjects = new GameObject[numOfResults];
-        for (int i = 0; i < numOfResults; i++)
+
+        // 表示すべきリザルトの数は基本 100 個だが、表示すべきページが最終ページである場合、100 未満となり得る。
+        // その場合、表示すべきページより若いページに含まれるリザルト数を引いたリザルト数が
+        // 最終ページのリザルト数であり、それが表示すべきリザルトの数である。
+        int numOfResultsToShow = Math.Min(100, summaries.NumOfResults - (pageNumberToShow * 100));
+        resultSummaryObjects = new GameObject[numOfResultsToShow];
+        for (int i = 0; i < numOfResultsToShow; i++)
         {
             // ResultListContent オブジェクトの子として描画
             resultSummaryObjects[i] = Instantiate(ResultSummaryPrefab, resultsListContent.transform);
@@ -78,16 +96,16 @@ public class ResultsListObjectController : MonoBehaviour
         }
 
         // 表示
-        for (int i = 0; i < numOfResults; i++)
+        for (int i = 0; i < numOfResultsToShow; i++)
         {
-            DisplayResultSummary(i, summaries.summaryList[i]);
+            DisplayResultSummary(i, summaries.summaryList[(pageNumberToShow * 100) + i]);
         }
 
         // クリックされた場合のイベントハンドラの取り付け
-        for (int i = 0; i < numOfResults; i++)
+        for (int i = 0; i < numOfResultsToShow; i++)
         {
             Button prefabButton = resultSummaryObjects[i].GetComponent<Button>();
-            string filePath = summaries.summaryList[i].FilePath;
+            string filePath = summaries.summaryList[(pageNumberToShow * 100) + i].FilePath;
             prefabButton.onClick.AddListener(() => resultDetailSubManager.ResultSummaryClickedHandler(filePath));
         }
 

@@ -19,6 +19,9 @@ public class ResultsListSubManager : MonoBehaviour
 
     ResultSummaries resultSummaries;
 
+    // ResultsListPager
+    int pageNumberToShow = 0;
+
     void Awake()
     {
         // 上司を見つける
@@ -33,7 +36,8 @@ public class ResultsListSubManager : MonoBehaviour
         gameMode = resultsManager.GetGameMode();
         resultSummaries = new ResultSummaries(gameMode, isTerminated, isGuestResult);
 
-        resultsListObjectController.DisplayResultSummaries(resultSummaries);
+        resultsListObjectController.FitPagerDropDownToNumOfResults(resultSummaries);
+        resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
     }
 
     // Update is called once per frame
@@ -45,13 +49,14 @@ public class ResultsListSubManager : MonoBehaviour
     void OnDestroy()
     {
     }
+    #region Sort
     public void SortByRankAscendingValueChangedHandler(bool isOn)
     {
         Debug.Log($"RankAscending Changed To {isOn}");
         if (isOn)
         {
             resultSummaries.SortByRankAscending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
     public void SortByRankDescendingValueChangedHandler(bool isOn)
@@ -60,7 +65,7 @@ public class ResultsListSubManager : MonoBehaviour
         if (isOn)
         {
             resultSummaries.SortByRankDescending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
     public void SortByTimeAscendingValueChangedHandler(bool isOn)
@@ -69,7 +74,7 @@ public class ResultsListSubManager : MonoBehaviour
         if (isOn)
         {
             resultSummaries.SortByTimeAscending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
     public void SortByTimeDescendingValueChangedHandler(bool isOn)
@@ -78,7 +83,7 @@ public class ResultsListSubManager : MonoBehaviour
         if (isOn)
         {
             resultSummaries.SortByTimeDescending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
     public void SortByMissAscendingValueChangedHandler(bool isOn)
@@ -87,7 +92,7 @@ public class ResultsListSubManager : MonoBehaviour
         if (isOn)
         {
             resultSummaries.SortByMissAscending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
     public void SortByMissDescendingValueChangedHandler(bool isOn)
@@ -96,7 +101,7 @@ public class ResultsListSubManager : MonoBehaviour
         if (isOn)
         {
             resultSummaries.SortByMissDescending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
     public void SortByDateTimeAscendingValueChangedHandler(bool isOn)
@@ -104,7 +109,7 @@ public class ResultsListSubManager : MonoBehaviour
         if (isOn)
         {
             resultSummaries.SortByDateTimeAscending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
     public void SortByDateTimeDescendingValueChangedHandler(bool isOn)
@@ -112,7 +117,51 @@ public class ResultsListSubManager : MonoBehaviour
         if (isOn)
         {
             resultSummaries.SortByDateTimeDescending();
-            resultsListObjectController.DisplayResultSummaries(resultSummaries);
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
         }
     }
+    #endregion
+
+    #region ResultsListPager
+    public void PagerLeftButtonClickedHandler()
+    {
+        // 存在するページ番号は [0, ~ max(0, ceil(ResultSummary の数 / 100) - 1)]
+        if (pageNumberToShow - 1 >= 0)
+        {
+            pageNumberToShow--;
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
+        }
+    }
+    public void PagerRightButtonClickedHandler()
+    {
+        // 存在するページ番号は [0, ~ max(0, ceil(ResultSummary の数 / 100) - 1)]
+        // ceil(a / b) == (a + b - 1) / b
+        if (pageNumberToShow + 1 <= (resultSummaries.NumOfResults + 100 - 1) / 100 - 1)
+        {
+            pageNumberToShow++;
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
+        }
+    }
+    /// <summary>
+    /// </summary>
+    /// <param name="newPageNumberToShow">0-indexed</param>
+    public void JumpToPage(int newPageNumberToShow)
+    {
+        // 存在するページ番号は [0, ~ max(0, ceil(ResultSummary の数 / 100) - 1)]
+        // ceil(a / b) == (a + b - 1) / b
+        // ドロップダウンリストに無いページにはジャンプしようとしないはずだが Assert をかけておく
+        Debug.Assert(pageNumberToShow >= 0);
+        Debug.Assert(pageNumberToShow <= (resultSummaries.NumOfResults + 100 - 1) / 100 - 1);
+        if (newPageNumberToShow != pageNumberToShow)
+        {
+            pageNumberToShow = newPageNumberToShow;
+            resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
+        }
+    }
+    public void OnPagerDropdownValueChanged(int value)
+    {
+        JumpToPage(value);
+    }
+
+    #endregion
 }
