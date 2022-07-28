@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using TMPro;
 
 /// <summary>
 /// Results 配下の SubManager
@@ -21,6 +22,7 @@ public class ResultsListSubManager : MonoBehaviour
 
     // ResultsListPager
     int pageNumberToShow = 0;
+    TMP_Dropdown pagerDropdown;
 
     void Awake()
     {
@@ -29,6 +31,8 @@ public class ResultsListSubManager : MonoBehaviour
 
         // 部下を見つける
         resultsListObjectController = GetComponent<ResultsListObjectController>();
+
+        pagerDropdown = GameObject.Find("PagerDropdown").GetComponent<TMP_Dropdown>();
     }
     // Start is called before the first frame update
     void Start()
@@ -130,6 +134,7 @@ public class ResultsListSubManager : MonoBehaviour
         {
             pageNumberToShow--;
             resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
+            pagerDropdown.SetValueWithoutNotify(pageNumberToShow);
         }
     }
     public void PagerRightButtonClickedHandler()
@@ -140,6 +145,7 @@ public class ResultsListSubManager : MonoBehaviour
         {
             pageNumberToShow++;
             resultsListObjectController.DisplayResultSummaries(resultSummaries, pageNumberToShow);
+            pagerDropdown.SetValueWithoutNotify(pageNumberToShow);
         }
     }
     /// <summary>
