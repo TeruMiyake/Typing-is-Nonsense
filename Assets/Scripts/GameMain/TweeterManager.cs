@@ -6,6 +6,7 @@ using TMPro; // スクリプトから TextMeshPro の変更
 
 public class TweeterManager : MonoBehaviour
 {
+    string rankingURL = "https://tin.terum.jp";
     public GameObject gameMainManager;
 
     // 状態変数
@@ -106,7 +107,7 @@ public class TweeterManager : MonoBehaviour
                     $"Completed a trial ({keys} chars) on #TypingIsNonsense !" +
                     $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss}" +
                     $"{(miss > 50 ? " > 50 = Unofficial)." : "). Wow!")}" +
-                    $"\nRanking: https://terum.jp/tin/";
+                    $"\nRanking: {rankingURL}";
                 SetTweet(tweet);
             }
             else if (gstate == "Canceled")
@@ -114,7 +115,7 @@ public class TweeterManager : MonoBehaviour
                 string tweet =
                     $"GAVE UP a trial ({keys}/360 chars) on #TypingIsNonsense ..." +
                     $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss})." +
-                    $"\nRanking: https://terum.jp/tin/";
+                    $"\nRanking: {rankingURL}";
                 SetTweet(tweet);
             }
             else if (gstate == "Failed")
@@ -122,7 +123,7 @@ public class TweeterManager : MonoBehaviour
                 string tweet =
                     $"FAILED a miss <= {nowTrialData.MissLimit} challenge ({keys}/360 chars) on #TypingIsNonsense . OMG!" +
                     $"\nTIME {ToFormattedTime(time)}s ({cps:f3}cps miss{miss})." +
-                    $"\nRanking: https://terum.jp/tin/";
+                    $"\nRanking: {rankingURL}";
                 SetTweet(tweet);
             }
         }
@@ -139,7 +140,7 @@ public class TweeterManager : MonoBehaviour
     void JumpToWebsite()
     {
         // ゲーム中でも反応してしまうため
-        if (isTweeting) Application.OpenURL("https://terum.jp/tin/");
+        if (isTweeting) Application.OpenURL($"{rankingURL}");
     }
 
     // イベントハンドラ
