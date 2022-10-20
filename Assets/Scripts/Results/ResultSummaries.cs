@@ -21,6 +21,12 @@ public class ResultSummaries
     HashSet<string> fileNameSetInLogDir = new HashSet<string>();
     HashSet<string> fileNameSetInRegistCodeDir = new HashSet<string>();
 
+    /// <summary>
+    /// ResultSummary は、このコンストラクタ内でランク昇順にソートされて List に格納される
+    /// </summary>
+    /// <param name="_gameMode"></param>
+    /// <param name="isTerminated"></param>
+    /// <param name="isGuestResult"></param>
     public ResultSummaries(int _gameMode, bool isTerminated, bool isGuestResult)
     {
         // ゲームモード定数の設定
@@ -79,6 +85,7 @@ public class ResultSummaries
             NumOfResults = summaryList.Count;
 
             // 並べ替えて ResultSummary.Rank を設定
+            // 同じタイムであれば新しい記録の方が良い順位とするルールのため、先に DateTime で降順ソート
             SortByDateTimeDescending();
             SortByTimeAscending();
             for (int i = 1; i < NumOfResults + 1; i++)
@@ -189,6 +196,16 @@ public class ResultSummaries
         {
                 sw.WriteLine(summary.ToStringForRankingTxt());
         }
+    }
+
+    /// <summary>
+    /// 1 位の記録を返す
+    /// </summary>
+    /// <returns></returns>
+    public ResultSummary GetBestResultByRank()
+    {
+        SortByRankAscending();
+        return summaryList[0];
     }
 }
 

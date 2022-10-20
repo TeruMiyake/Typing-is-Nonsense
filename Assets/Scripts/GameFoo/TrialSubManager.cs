@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Security.Cryptography; // 乱数生成
 using UnityEngine;
 
+// TODO
+// トライアル終了時のメッセージ関係のメソッド名再考
+// リザルト一覧取得・更新をメソッドに切り分ける？
 public class TrialSubManager : MonoBehaviour
 {
     // ゲームモード変数
@@ -25,6 +28,15 @@ public class TrialSubManager : MonoBehaviour
 
     // ストップウォッチ
     System.Diagnostics.Stopwatch myStopwatch;
+
+    // 現在のリザルト一覧
+    // トライアル完了時に新記録樹立かどうかを判別するのに使っている
+    bool hasNoResults = true;
+    ResultSummaries resultSummaries;
+    /// <summary>
+    /// hasNoResults == true の場合 null であることに注意
+    /// </summary>
+    ResultSummary bestResult;
 
 
     // 細かいゲーム変数（定数から設定する）
@@ -48,6 +60,15 @@ public class TrialSubManager : MonoBehaviour
         assignmentLength = GlobalConsts.AssignmentLength[0];
         lapLength = GlobalConsts.LapLength[0];
         numOfLaps = GlobalConsts.NumOfLaps[0];
+
+        // リザルト一覧の取得
+        // 
+        resultSummaries = new ResultSummaries(gameMode, false, false);
+        if (resultSummaries.summaryList.Count > 0)
+        {
+            hasNoResults = false;
+            bestResult = resultSummaries.GetBestResultByRank();
+        }
 
         // 画面の初期化
         trialObjectController.NotifyGameStateChanged(GameState.Waiting);
@@ -254,8 +275,46 @@ public class TrialSubManager : MonoBehaviour
 
         gameManager.TryToSetGameState(GameState.Completed);
 
+        // 初回プレイ or 新記録樹立 or 新記録樹立ならず を判定
+        if (hasNoResults)
+        {
+            OnFirstRecord();
+        }
+        else
+        {
+            if (nowTrialData.TotalTime <= bestResult.TotalTime)
+            {
+                OnNewRecord();
+            }
+            else
+            {
+                OnNotNewRecord();
+            }
+        }
+
         // 終了時共通処理の呼び出し
         OnEndTrial();
+    }
+    /// <summary>
+    /// 初回記録樹立（？）時の処理。そのうちメソッド名をもうちょっとまともにする。
+    /// </summary>
+    void OnFirstRecord()
+    {
+        MessageController.Instance.ShowMessage($"Welcome to the world of TiN!\nYour record: {nowTrialData.TotalTime.ToFormattedTime()}s.", 5);
+    }
+    /// <summary>
+    /// 新記録樹立時の処理（メッセージ表示のみ。変に分岐を作るのが嫌なので、新記録樹立時以外は無駄になるが、リザルト一覧の更新は OnEndTrial() で行う。）
+    /// </summary>
+    void OnNewRecord()
+    {
+        MessageController.Instance.ShowMessage($"Congratulations! It's a NEW RECORD!!!\n: Previous best - {bestResult.TotalTime.Subtract(nowTrialData.TotalTime).ToFormattedTime()}s.", 5);
+    }
+    /// <summary>
+    /// そのうち削除。テスト用に、新記録じゃなくてもメッセージ表示
+    /// </summary>
+    void OnNotNewRecord()
+    {
+        MessageController.Instance.ShowMessage($"Good work!\nYour best + {nowTrialData.TotalTime.Subtract(bestResult.TotalTime).ToFormattedTime()}s. Keep it up!", 5);
     }
     /// <summary>
     /// トライアル中断時に固有の処理を行う。トライアル終了時の共通処理は OnEndTrial()
@@ -295,6 +354,15 @@ public class TrialSubManager : MonoBehaviour
         // 打ち切りなら登録コードの保存
         if (gameManager.GetGameState() == GameState.Completed)
             nowTrialData.SaveToRegistCodeFile();
+
+        // リザルト一覧の更新
+        // 処理速度を考えれば OnCompleteTrial() 内で処理すべきだが、実装を複雑化させたくないので SaveToLogFile() より後で実行している
+        resultSummaries = new ResultSummaries(gameMode, false, false);
+        if (resultSummaries.summaryList.Count > 0)
+        {
+            hasNoResults = false;
+            bestResult = resultSummaries.GetBestResultByRank();
+        }
 
         // トライアル情報の描画（トライアル中と計測の仕方が違うため、終了処理後に呼び出し）
         UpdateTrialInfo();

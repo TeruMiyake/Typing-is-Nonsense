@@ -75,6 +75,13 @@ public class MilliSecond : System.IEquatable<MilliSecond>, System.IComparable<Mi
         else if (ms == other.ms) return 0;
         else return -1;
     }
+    /// <summary>
+    /// 非破壊的減算。そのうち、実装を再考（演算子オーバーロードとか）
+    /// </summary>
+    public MilliSecond Subtract(MilliSecond other)
+    {
+        return new MilliSecond(ms - other.ms);
+    }
 }
 
 /// <summary>
