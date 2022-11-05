@@ -33,7 +33,7 @@ public class TitleManager : MonoBehaviour
 
     void JumpToWebsite()
     {
-        Application.OpenURL("https://terum.jp/tin/");
+        Application.OpenURL(GlobalConsts.RankingSiteURL_Home);
     }
     void ExitGame()
     {

@@ -44,4 +44,7 @@ public static class GlobalConsts
 
     // 色設定
     public static readonly Color TypedCharColor = new Color(0.25f, 0.15f, 0.15f, 0.1f);
+
+    // URL 等
+    public static string RankingSiteURL_Home = "https://tin.terum.jp";
 }

@@ -6,7 +6,7 @@ using TMPro; // スクリプトから TextMeshPro の変更
 
 public class TweeterManager : MonoBehaviour
 {
-    string rankingURL = "https://tin.terum.jp";
+    string rankingURL = GlobalConsts.RankingSiteURL_Home;
     public GameObject gameMainManager;
 
     // 状態変数
