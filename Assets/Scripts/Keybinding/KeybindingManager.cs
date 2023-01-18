@@ -75,13 +75,18 @@ public class KeybindingManager : MonoBehaviour
         {
             InstantiateCharBinder(i, 380, -122 - (i-49) * 40);
             // InputField.colors.normalColor に直接 Color を代入できないため、まず ColorBlock をまるごと作って渡す
-            ColorBlock cb = charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().colors;
+            ColorBlock cb = charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<TMP_InputField>().colors;
             cb.normalColor = new Color(0.85f, 0.7f, 0.5f, 1f);
-            charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().colors = cb;
+            charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<TMP_InputField>().colors = cb;
         }
 
         // EventBus に登録
         EventBus.Instance.SubscribeRawKeyDown(RawKeyDownEventHandler);
+
+        // フォントフォールバック追加
+        TMP_InputField prefabInputField = CharBinderPrefab.GetComponent<RectTransform>().Find("CharInputField").GetComponent<TMP_InputField>();
+        TMP_FontAsset prefabFontAsset = prefabInputField.fontAsset;
+        RuntimeFontController.Instance.AddUserFontsToFallback(prefabFontAsset);
     }
 
     // Start is called before the first frame update
@@ -137,7 +142,7 @@ public class KeybindingManager : MonoBehaviour
 
         // ここで id をそのまま引数に渡すと、スコープの関係でバグる
         ushort buttonNum = (ushort)id;
-        charBinder[id].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().onEndEdit.AddListener((str) => OnCharEdited(buttonNum, str));
+        charBinder[id].GetComponent<RectTransform>().Find("CharInputField").GetComponent<TMP_InputField>().onEndEdit.AddListener((str) => OnCharEdited(buttonNum, str));
     }
 
     // イベントハンドラ
@@ -209,7 +214,7 @@ public class KeybindingManager : MonoBehaviour
             string s = nowBindingKeyBind.CharMap[i].ToString();
             if (s == "\0" || s == "") s = "(NULL)";
             if (s == " ") s = "(Space)";
-            charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().text = s;
+            charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<TMP_InputField>().text = s;
         }
 
         // CharBinderID : 49 ~ 96 (Shifted)
@@ -218,7 +223,7 @@ public class KeybindingManager : MonoBehaviour
             string s = nowBindingKeyBind.CharMap[i].ToString();
             if (s == "\0" || s == "") s = "(NULL)";
             if (s == " ") s = "(Space)";
-            charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<InputField>().text = s;
+            charBinder[i].GetComponent<RectTransform>().Find("CharInputField").GetComponent<TMP_InputField>().text = s;
         }
     }
 

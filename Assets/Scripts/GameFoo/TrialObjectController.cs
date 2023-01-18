@@ -10,6 +10,7 @@ public class TrialObjectController : MonoBehaviour
     public int gameMode;
 
     // 課題文字表示用プレハブ
+    // このプレハブには、ユーザー追加フォントをアセット化して読み込む必要がある
     public GameObject AssignedCharTMPPrefab;
     GameObject[] assignedCharTMPs;
 
@@ -51,6 +52,11 @@ public class TrialObjectController : MonoBehaviour
         // 制御すべきオブジェクトなどの取得と初期化
         countDownTMPUGUI = GameObject.Find("CountDownTMP").GetComponent<TextMeshProUGUI>();
         SetCountDownText("");
+
+        // フォントフォールバック追加
+        TextMeshProUGUI prefabUGUI = AssignedCharTMPPrefab.GetComponent<TextMeshProUGUI>();
+        TMP_FontAsset prefabFontAsset = prefabUGUI.font;
+        RuntimeFontController.Instance.AddUserFontsToFallback(prefabFontAsset);
     }
 
     // Start is called before the first frame update
